@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scopus Publication Dashboard - Faculty of Medicine, NU</title>
+    <meta name="description" content="Interactive research publication statistics dashboard for Faculty of Medicine, Naresuan University, powered by Scopus API.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main CSS stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="glass-bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div class="logo-text">
+                    <h2>MedNU</h2>
+                    <span>Research Analytics</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#overview" class="nav-item active" id="nav-overview">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Overview</span>
+                </a>
+                <a href="#publications" class="nav-item" id="nav-publications">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span>Publications</span>
+                </a>
+                <a href="#authors" class="nav-item" id="nav-authors">
+                    <i class="fa-solid fa-user-doctor"></i>
+                    <span>Researchers</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="datasource-badge" id="data-source-badge">
+                    <i class="fa-solid fa-database"></i>
+                    <span>DataSource: Scopus</span>
+                </div>
+                <div class="updated-time" id="retrieved-at">
+                    Syncing...
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="content-header">
+                <div class="header-title">
+                    <h1>Faculty of Medicine Dashboard</h1>
+                    <p>Naresuan University Research Publications Overview</p>
+                </div>
+                
+                <div class="header-controls">
+                    <div class="filter-group">
+                        <label for="year-filter"><i class="fa-regular fa-calendar"></i> Year:</label>
+                        <select id="year-filter">
+                            <option value="all">All Years</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-refresh" id="btn-refresh-data" title="Re-fetch Data">
+                        <i class="fa-solid fa-arrows-rotate"></i>
+                        <span>Sync</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dashboard Sections -->
+            <div class="dashboard-scroll-area">
+                
+                <!-- Overview Section -->
+                <section id="overview-section" class="dashboard-section active">
+                    <!-- KPI Row -->
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <span class="kpi-title">Total Publications</span>
+                                <div class="kpi-icon icon-blue">
+                                    <i class="fa-solid fa-file-invoice"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-value" id="kpi-total-docs">0</div>
+                            <div class="kpi-footer">
+                                <span class="trend trend-up"><i class="fa-solid fa-caret-up"></i> Active Growth</span>
+                            </div>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <span class="kpi-title">Total Citations</span>
+                                <div class="kpi-icon icon-purple">
+                                    <i class="fa-solid fa-quote-right"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-value" id="kpi-total-citations">0</div>
+                            <div class="kpi-footer">
+                                <span class="trend trend-up" id="kpi-avg-citations">Avg: 0 per article</span>
+                            </div>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <span class="kpi-title">Highest Citation Paper</span>
+                                <div class="kpi-icon icon-gold">
+                                    <i class="fa-solid fa-award"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-value value-small" id="kpi-max-citations">0</div>
+                            <div class="kpi-footer text-truncate" id="kpi-max-citations-title" title="">
+                                Loading...
+                            </div>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <span class="kpi-title">Top Researcher</span>
+                                <div class="kpi-icon icon-teal">
+                                    <i class="fa-solid fa-user-doctor"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-value value-small" id="kpi-top-author">Loading...</div>
+                            <div class="kpi-footer" id="kpi-top-author-count">
+                                0 publications
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Grid -->
+                    <div class="charts-grid">
+                        <!-- Chart 1: Publication trend -->
+                        <div class="chart-card large-chart">
+                            <h3><i class="fa-solid fa-chart-line"></i> Publication & Citation Trend</h3>
+                            <div class="chart-container">
+                                <canvas id="trendChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Chart 2: Top Authors -->
+                        <div class="chart-card">
+                            <h3><i class="fa-solid fa-ranking-star"></i> Top 10 Medical Researchers</h3>
+                            <div class="chart-container">
+                                <canvas id="authorsChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Chart 3: Department breakdown -->
+                        <div class="chart-card">
+                            <h3><i class="fa-solid fa-network-wired"></i> Specialty & Departments</h3>
+                            <div class="chart-container">
+                                <canvas id="departmentsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Publications List Section -->
+                <section id="publications-section" class="dashboard-section">
+                    <div class="section-card">
+                        <div class="section-card-header">
+                            <h2><i class="fa-solid fa-book-bookmark"></i> All Academic Publications</h2>
+                            <div class="search-box">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" id="pub-search" placeholder="Search by Title, Author, or Journal...">
+                            </div>
+                        </div>
+                        
+                        <div class="table-container">
+                            <table class="data-table" id="publications-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 45%; cursor: pointer;" id="th-title">Article Title <i class="fa-solid fa-sort" style="font-size: 0.8rem; margin-left: 0.25rem; opacity: 0.6;"></i></th>
+                                        <th style="width: 22%; cursor: pointer;" id="th-author">First Author / Researchers <i class="fa-solid fa-sort" style="font-size: 0.8rem; margin-left: 0.25rem; opacity: 0.6;"></i></th>
+                                        <th style="width: 18%; cursor: pointer;" id="th-journal">Journal <i class="fa-solid fa-sort" style="font-size: 0.8rem; margin-left: 0.25rem; opacity: 0.6;"></i></th>
+                                        <th style="width: 8%; text-align: center; cursor: pointer;" id="th-year">Year <i class="fa-solid fa-sort-down" style="font-size: 0.8rem; margin-left: 0.25rem;"></i></th>
+                                        <th style="width: 7%; text-align: center; cursor: pointer;" id="th-citations">Citations <i class="fa-solid fa-sort" style="font-size: 0.8rem; margin-left: 0.25rem; opacity: 0.6;"></i></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="publications-tbody">
+                                    <!-- Dynamic rows loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="pagination-footer">
+                            <div class="pagination-left" style="display: flex; align-items: center; gap: 1.5rem;">
+                                <span class="pagination-info" id="pagination-info">Showing 0 to 0 of 0 entries</span>
+                                <div class="page-size-selector" style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-secondary);">
+                                    <label for="page-size-select">Show:</label>
+                                    <select id="page-size-select" style="background: #ffffff; border: 1px solid var(--border-color); padding: 0.25rem 0.5rem; border-radius: 6px; color: var(--text-primary); cursor: pointer; outline: none;">
+                                        <option value="25">25</option>
+                                        <option value="50">50</option>
+                                        <option value="100">100</option>
+                                        <option value="200">200</option>
+                                        <option value="all">All</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="pagination-buttons">
+                                <button class="btn btn-nav" id="btn-prev" disabled><i class="fa-solid fa-angle-left"></i> Previous</button>
+                                <button class="btn btn-nav" id="btn-next" disabled>Next <i class="fa-solid fa-angle-right"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Researchers List Section -->
+                <section id="authors-section" class="dashboard-section">
+                    <div class="section-card">
+                        <div class="section-card-header">
+                            <h2><i class="fa-solid fa-user-doctor"></i> Medical Faculty Researchers</h2>
+                            <div class="search-box">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" id="author-search" placeholder="Search Researcher Name...">
+                            </div>
+                        </div>
+                        
+                        <div class="authors-list-grid" id="authors-list-grid">
+                            <!-- Dynamic Cards loaded here -->
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Researcher Detail Modal -->
+    <div class="modal-overlay" id="researcher-modal">
+        <div class="modal-card">
+            <button class="modal-close" id="modal-close-btn">&times;</button>
+            <div class="modal-header">
+                <div class="modal-avatar" id="modal-avatar">T</div>
+                <div class="modal-profile-info">
+                    <h3 id="modal-author-name">Researcher Name</h3>
+                    <p id="modal-author-dept">Department</p>
+                </div>
+            </div>
+            <div class="modal-stats">
+                <div class="modal-stat-card">
+                    <span class="stat-label">Publications</span>
+                    <span class="stat-value" id="modal-stat-pubs">0</span>
+                </div>
+                <div class="modal-stat-card">
+                    <span class="stat-label">Total Citations</span>
+                    <span class="stat-value" id="modal-stat-citations" style="color: var(--accent-purple);">0</span>
+                </div>
+                <div class="modal-stat-card">
+                    <span class="stat-label">Avg Citations</span>
+                    <span class="stat-value" id="modal-stat-avg" style="color: var(--accent-teal);">0.0</span>
+                </div>
+            </div>
+            <div class="modal-publications">
+                <h4>Publications List</h4>
+                <div class="modal-pub-list" id="modal-pub-list">
+                    <!-- Dynamic list items -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script imports -->
+    <script src="app.js"></script>
+</body>
+</html>

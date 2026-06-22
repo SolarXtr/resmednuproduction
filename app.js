@@ -1,0 +1,829 @@
+document.addEventListener('DOMContentLoaded', () => {
+    // Application State
+    let database = null;
+    let filteredResults = [];
+    let currentYear = 'all';
+    
+    // Pagination state
+    let currentPage = 1;
+    let itemsPerPage = 25; // Default to 25 as requested
+    
+    // Sorting state
+    let sortField = 'year';
+    let sortDirection = 'desc';
+
+    // Charts instances
+    let trendChart = null;
+    let authorsChart = null;
+    let departmentsChart = null;
+
+    // DOM Elements
+    const navOverview = document.getElementById('nav-overview');
+    const navPublications = document.getElementById('nav-publications');
+    const navAuthors = document.getElementById('nav-authors');
+    
+    const secOverview = document.getElementById('overview-section');
+    const secPublications = document.getElementById('publications-section');
+    const secAuthors = document.getElementById('authors-section');
+
+    const yearFilter = document.getElementById('year-filter');
+    const btnRefresh = document.getElementById('btn-refresh-data');
+    const retrievedTimeEl = document.getElementById('retrieved-at');
+    const dataSourceBadge = document.getElementById('data-source-badge');
+
+    // KPI Elements
+    const kpiTotalDocs = document.getElementById('kpi-total-docs');
+    const kpiTotalCitations = document.getElementById('kpi-total-citations');
+    const kpiAvgCitations = document.getElementById('kpi-avg-citations');
+    const kpiMaxCitations = document.getElementById('kpi-max-citations');
+    const kpiMaxCitationsTitle = document.getElementById('kpi-max-citations-title');
+    const kpiTopAuthor = document.getElementById('kpi-top-author');
+    const kpiTopAuthorCount = document.getElementById('kpi-top-author-count');
+
+    // Search and dynamic contents
+    const pubSearchInput = document.getElementById('pub-search');
+    const publicationsTbody = document.getElementById('publications-tbody');
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
+    const paginationInfo = document.getElementById('pagination-info');
+    const pageSizeSelect = document.getElementById('page-size-select');
+
+    const authorSearchInput = document.getElementById('author-search');
+    const authorsListGrid = document.getElementById('authors-list-grid');
+
+    // Modal elements
+    const researcherModal = document.getElementById('researcher-modal');
+    const modalCloseBtn = document.getElementById('modal-close-btn');
+    const modalAuthorName = document.getElementById('modal-author-name');
+    const modalAuthorDept = document.getElementById('modal-author-dept');
+    const modalAvatar = document.getElementById('modal-avatar');
+    const modalStatPubs = document.getElementById('modal-stat-pubs');
+    const modalStatCitations = document.getElementById('modal-stat-citations');
+    const modalStatAvg = document.getElementById('modal-stat-avg');
+    const modalPubList = document.getElementById('modal-pub-list');
+
+    // --- NAVIGATION LOGIC ---
+    const navItems = [navOverview, navPublications, navAuthors];
+    const sections = [secOverview, secPublications, secAuthors];
+
+    function switchSection(targetId) {
+        navItems.forEach(item => {
+            if (item.getAttribute('href') === `#${targetId}`) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+
+        sections.forEach(section => {
+            if (section.id === `${targetId}-section`) {
+                section.classList.add('active');
+            } else {
+                section.classList.remove('active');
+            }
+        });
+    }
+
+    navItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = item.getAttribute('href').substring(1);
+            switchSection(targetId);
+        });
+    });
+
+    // --- DATA LOADING & INITIALIZATION ---
+    async function loadData() {
+        try {
+            retrievedTimeEl.textContent = 'Loading dataset...';
+            const response = await fetch('data.json');
+            if (!response.ok) {
+                throw new Error('Failed to fetch publication data');
+            }
+            database = await response.json();
+            
+            // UI Indicators update
+            retrievedTimeEl.textContent = `Sync: ${database.retrieved_at}`;
+            if (database.data_source === 'mock_data') {
+                dataSourceBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> <span>DataSource: Sandbox Mode</span>`;
+                dataSourceBadge.style.color = '#eab308';
+            } else {
+                dataSourceBadge.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>DataSource: Scopus API</span>`;
+                dataSourceBadge.style.color = '#14b8a6';
+            }
+
+            // Populate Year filter list
+            populateYearFilter();
+            
+            // Run analysis & display
+            applyFilter();
+        } catch (error) {
+            console.error('Error loading application data:', error);
+            retrievedTimeEl.textContent = 'Failed to load dataset';
+        }
+    }
+
+    function populateYearFilter() {
+        // Collect years
+        const years = new Set(database.results.map(r => r.year).filter(y => y && y !== 'Unknown Year'));
+        const sortedYears = Array.from(years).sort((a, b) => b - a); // descending order
+        
+        // Reset and populate with quick timeframe filters
+        yearFilter.innerHTML = `
+            <option value="all">All Years</option>
+            <option value="last3">Last 3 Years</option>
+            <option value="last5">Last 5 Years</option>
+            <option value="last10">Last 10 Years</option>
+        `;
+        
+        sortedYears.forEach(year => {
+            const opt = document.createElement('option');
+            opt.value = year;
+            opt.textContent = year;
+            yearFilter.appendChild(opt);
+        });
+    }
+
+    // --- DATA FILTERING ---
+    function applyFilter() {
+        currentYear = yearFilter.value;
+        
+        // Find maximum year in the dataset to calculate relative ranges dynamically
+        const years = database.results.map(r => parseInt(r.year, 10)).filter(y => !isNaN(y));
+        const maxYear = years.length > 0 ? Math.max(...years) : new Date().getFullYear();
+
+        // 1. Filter by year or timeframe range
+        filteredResults = database.results.filter(pub => {
+            const pubYr = parseInt(pub.year, 10);
+            if (currentYear === 'all') {
+                return true;
+            } else if (currentYear === 'last3') {
+                return !isNaN(pubYr) && pubYr >= (maxYear - 2);
+            } else if (currentYear === 'last5') {
+                return !isNaN(pubYr) && pubYr >= (maxYear - 4);
+            } else if (currentYear === 'last10') {
+                return !isNaN(pubYr) && pubYr >= (maxYear - 9);
+            } else {
+                return pub.year === currentYear;
+            }
+        });
+
+        // Compute KPIs & Charts (Year filtered, without search filter so dashboard remains consistent)
+        updateOverviewKPIs(filteredResults);
+        updateOverviewCharts(filteredResults);
+
+        // 2. Render Publications and Authors with search filters
+        renderPublicationsTable();
+        renderAuthorsList();
+    }
+
+    // Filter Listeners
+    yearFilter.addEventListener('change', () => {
+        currentPage = 1;
+        applyFilter();
+    });
+
+    pubSearchInput.addEventListener('input', () => {
+        currentPage = 1;
+        renderPublicationsTable();
+    });
+
+    authorSearchInput.addEventListener('input', () => {
+        renderAuthorsList();
+    });
+
+    btnRefresh.addEventListener('click', () => {
+        loadData();
+    });
+
+    // --- KPI COMPILATION ---
+    function updateOverviewKPIs(data) {
+        const totalDocs = data.length;
+        kpiTotalDocs.textContent = totalDocs.toLocaleString();
+
+        let totalCitations = 0;
+        let maxCites = -1;
+        let maxCiteTitle = 'N/A';
+        let maxCiteDoi = '';
+
+        const authorCounts = {};
+
+        data.forEach(pub => {
+            totalCitations += pub.citations;
+            
+            if (pub.citations > maxCites) {
+                maxCites = pub.citations;
+                maxCiteTitle = pub.title;
+                maxCiteDoi = pub.doi || '';
+            }
+
+            // Calculate publications per author (Registered only)
+            const registeredNames = new Set(database.researchers.map(r => r.name.trim().toLowerCase()));
+            pub.authors.forEach(author => {
+                const cleanedAuth = author.trim();
+                if (registeredNames.has(cleanedAuth.toLowerCase())) {
+                    authorCounts[cleanedAuth] = (authorCounts[cleanedAuth] || 0) + 1;
+                }
+            });
+        });
+
+        kpiTotalCitations.textContent = totalCitations.toLocaleString();
+        
+        const avg = totalDocs > 0 ? (totalCitations / totalDocs).toFixed(1) : 0;
+        kpiAvgCitations.innerHTML = `<i class="fa-solid fa-chart-line"></i> Avg: ${avg} citation${avg != 1 ? 's' : ''} per article`;
+
+        if (maxCites >= 0) {
+            kpiMaxCitations.textContent = maxCites.toLocaleString();
+            kpiMaxCitationsTitle.textContent = maxCiteTitle;
+            kpiMaxCitationsTitle.title = maxCiteTitle;
+        } else {
+            kpiMaxCitations.textContent = "0";
+            kpiMaxCitationsTitle.textContent = "No citations";
+        }
+
+        // Find top author
+        let topAuthor = 'N/A';
+        let topCount = 0;
+        for (const [author, count] of Object.entries(authorCounts)) {
+            if (count > topCount) {
+                topCount = count;
+                topAuthor = author;
+            }
+        }
+
+        kpiTopAuthor.textContent = topAuthor;
+        kpiTopAuthorCount.textContent = `${topCount} publication${topCount != 1 ? 's' : ''}`;
+    }
+
+    // --- CHART GENERATION ---
+    function updateOverviewCharts(data) {
+        // Destroy existing chart instances to avoid overlap/bugs
+        if (trendChart) trendChart.destroy();
+        if (authorsChart) authorsChart.destroy();
+        if (departmentsChart) departmentsChart.destroy();
+
+        // 1. Compile publications & citations by year
+        const yearStats = {};
+        data.forEach(pub => {
+            const yr = pub.year;
+            if (!yearStats[yr]) {
+                yearStats[yr] = { pubs: 0, cites: 0 };
+            }
+            yearStats[yr].pubs++;
+            yearStats[yr].cites += pub.citations;
+        });
+
+        const sortedYears = Object.keys(yearStats).sort();
+        const pubsData = sortedYears.map(yr => yearStats[yr].pubs);
+        const citesData = sortedYears.map(yr => yearStats[yr].cites);
+
+        // Render Trend Chart
+        const ctxTrend = document.getElementById('trendChart').getContext('2d');
+        
+        // Find peak publication year index to highlight
+        const maxPubs = Math.max(...pubsData);
+        const barColors = pubsData.map(val => val === maxPubs && maxPubs > 0 ? 'rgba(37, 99, 235, 0.95)' : 'rgba(148, 163, 184, 0.4)');
+        const barBorderColors = pubsData.map(val => val === maxPubs && maxPubs > 0 ? '#2563eb' : '#94a3b8');
+
+        trendChart = new Chart(ctxTrend, {
+            type: 'bar',
+            data: {
+                labels: sortedYears,
+                datasets: [
+                    {
+                        label: 'Publications (Highlighted Peak)',
+                        data: pubsData,
+                        backgroundColor: barColors,
+                        borderColor: barBorderColors,
+                        borderWidth: 1.5,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Citations Trend',
+                        data: citesData,
+                        type: 'line',
+                        borderColor: '#7c3aed',
+                        backgroundColor: 'rgba(124, 58, 237, 0.1)',
+                        borderWidth: 3.5,
+                        tension: 0.3,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#7c3aed',
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { color: '#475569' }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label.includes('Publications')) {
+                                    const isPeak = context.parsed.y === maxPubs;
+                                    return `Publications: ${context.parsed.y} ${isPeak ? '★ PEAK YEAR' : ''}`;
+                                }
+                                return `Citations: ${context.parsed.y}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: '#f1f5f9' },
+                        ticks: { color: '#64748b', font: { weight: 'bold' } }
+                    },
+                    y: {
+                        position: 'left',
+                        grid: { color: '#e2e8f0' },
+                        ticks: { color: '#64748b' },
+                        title: { display: true, text: 'Publications count', color: '#64748b' }
+                    },
+                    y1: {
+                        position: 'right',
+                        grid: { drawOnChartArea: false },
+                        ticks: { color: '#64748b' },
+                        title: { display: true, text: 'Citations count', color: '#64748b' }
+                    }
+                }
+            }
+        });
+
+        // 2. Compile Top 10 Authors (Registered only)
+        const registeredNames = new Set(database.researchers.map(r => r.name.trim().toLowerCase()));
+        const authorCounts = {};
+        data.forEach(pub => {
+            pub.authors.forEach(auth => {
+                const cleanedAuth = auth.trim();
+                if (registeredNames.has(cleanedAuth.toLowerCase())) {
+                    authorCounts[cleanedAuth] = (authorCounts[cleanedAuth] || 0) + 1;
+                }
+            });
+        });
+
+        const topAuthors = Object.entries(authorCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 10);
+
+        const authorLabels = topAuthors.map(item => item[0]);
+        const authorValues = topAuthors.map(item => item[1]);
+
+        // Highlight top 1 researcher, and top 2-3 in a medium shade, others in light neutral gray
+        const maxAuthorVal = authorValues[0];
+        const authorColors = authorValues.map((val, idx) => {
+            if (idx === 0) return 'rgba(13, 148, 136, 0.95)'; // Rank 1: Strong Teal
+            if (idx < 3) return 'rgba(13, 148, 136, 0.5)';   // Rank 2-3: Light Teal
+            return 'rgba(148, 163, 184, 0.3)';              // Others: Soft Gray
+        });
+        const authorBorderColors = authorValues.map((val, idx) => {
+            if (idx === 0) return '#0d9488';
+            if (idx < 3) return 'rgba(13, 148, 136, 0.7)';
+            return '#cbd5e1';
+        });
+
+        // Render Top Authors Chart
+        const ctxAuthors = document.getElementById('authorsChart').getContext('2d');
+        authorsChart = new Chart(ctxAuthors, {
+            type: 'bar',
+            data: {
+                labels: authorLabels,
+                datasets: [{
+                    label: 'Publications',
+                    data: authorValues,
+                    backgroundColor: authorColors,
+                    borderColor: authorBorderColors,
+                    borderWidth: 1.5
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        grid: { color: '#e2e8f0' },
+                        ticks: { color: '#64748b', stepSize: 1 }
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { color: '#0f172a', font: { weight: '500' } }
+                    }
+                }
+            }
+        });
+
+        // 3. Compile Department/Specialty Distribution
+        const deptCounts = {};
+        data.forEach(pub => {
+            if (pub.departments && pub.departments.length > 0) {
+                pub.departments.forEach(dept => {
+                    deptCounts[dept] = (deptCounts[dept] || 0) + 1;
+                });
+            } else {
+                deptCounts["General Medicine"] = (deptCounts["General Medicine"] || 0) + 1;
+            }
+        });
+
+        const sortedDepts = Object.entries(deptCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 6); // Keep top 6 specialties
+
+        const deptLabels = sortedDepts.map(item => item[0].replace('Department of ', ''));
+        const deptValues = sortedDepts.map(item => item[1]);
+
+        // Doughnut Chart colors: First (largest) specialty is highlighted with high saturation, others are muted gradient shades
+        const doughnutColors = [
+            'rgba(37, 99, 235, 0.95)', // Dominant Specialty: Deep Royal Blue
+            'rgba(148, 163, 184, 0.55)', // Rank 2
+            'rgba(148, 163, 184, 0.45)', // Rank 3
+            'rgba(148, 163, 184, 0.35)', // Rank 4
+            'rgba(148, 163, 184, 0.25)', // Rank 5
+            'rgba(148, 163, 184, 0.15)'  // Rank 6
+        ];
+
+        // Render Doughnut chart
+        const ctxDepts = document.getElementById('departmentsChart').getContext('2d');
+        departmentsChart = new Chart(ctxDepts, {
+            type: 'doughnut',
+            data: {
+                labels: deptLabels,
+                datasets: [{
+                    data: deptValues,
+                    backgroundColor: doughnutColors,
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#475569', boxWidth: 12, padding: 10 }
+                    }
+                }
+            }
+        });
+    }
+
+    // --- PUBLICATIONS TABLE RENDERING & PAGINATION ---
+    function renderPublicationsTable() {
+        const searchText = pubSearchInput.value.toLowerCase();
+        
+        // Apply search filter on top of year filter
+        const searchFiltered = filteredResults.filter(pub => {
+            return (
+                pub.title.toLowerCase().includes(searchText) ||
+                pub.creator.toLowerCase().includes(searchText) ||
+                pub.journal.toLowerCase().includes(searchText) ||
+                pub.authors.some(auth => auth.toLowerCase().includes(searchText))
+            );
+        });
+
+        // Apply sorting
+        searchFiltered.sort((a, b) => {
+            let valA, valB;
+            if (sortField === 'title') {
+                valA = a.title.toLowerCase();
+                valB = b.title.toLowerCase();
+            } else if (sortField === 'author') {
+                valA = a.creator.toLowerCase();
+                valB = b.creator.toLowerCase();
+            } else if (sortField === 'journal') {
+                valA = a.journal.toLowerCase();
+                valB = b.journal.toLowerCase();
+            } else if (sortField === 'year') {
+                valA = parseInt(a.year, 10) || 0;
+                valB = parseInt(b.year, 10) || 0;
+            } else if (sortField === 'citations') {
+                valA = a.citations;
+                valB = b.citations;
+            }
+            
+            if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+            if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+        // Update the visual sorting icons in the headers
+        updateSortIcons();
+
+        const totalItems = searchFiltered.length;
+        const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        // Slice for current page pagination
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+        const pageItems = searchFiltered.slice(startIndex, endIndex);
+
+        // Update pagination buttons state
+        btnPrev.disabled = (currentPage === 1);
+        btnNext.disabled = (currentPage === totalPages || totalItems === 0);
+        
+        if (totalItems > 0) {
+            paginationInfo.textContent = `Showing ${startIndex + 1} to ${endIndex} of ${totalItems} entries`;
+        } else {
+            paginationInfo.textContent = `No matches found`;
+        }
+
+        // Render Table Body Rows
+        publicationsTbody.innerHTML = '';
+        if (pageItems.length === 0) {
+            publicationsTbody.innerHTML = `
+                <tr>
+                    <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 3rem;">
+                        <i class="fa-solid fa-folder-open" style="font-size: 2.5rem; margin-bottom: 1rem; display: block;"></i>
+                        No publication data matches search parameters
+                    </td>
+                </tr>`;
+            return;
+        }
+
+        pageItems.forEach(pub => {
+            const tr = document.createElement('tr');
+            
+            // Format author tag display, highlighting the corresponding author
+            const formattedAuthors = pub.authors.map(author => {
+                const isCorresponding = (pub.corresponding_author && author.trim() === pub.corresponding_author.trim());
+                if (isCorresponding) {
+                    return `<strong>${author}</strong> <i class="fa-regular fa-envelope" title="Corresponding Author" style="color: var(--accent-purple); cursor: help;" class="corresponding-icon"></i>`;
+                }
+                return author;
+            }).join(', ');
+            
+            const doiSection = pub.doi ? `
+                <a href="https://doi.org/${pub.doi}" target="_blank" class="doi-badge">
+                    <i class="fa-solid fa-link"></i> DOI: ${pub.doi}
+                </a>` : '';
+
+            tr.innerHTML = `
+                <td>
+                    <span class="title-link" title="${pub.title}">${pub.title}</span>
+                    ${doiSection}
+                </td>
+                <td>
+                    <div class="researcher-tags" style="font-size: 0.85rem; line-height: 1.4;">
+                        ${formattedAuthors}
+                    </div>
+                </td>
+                <td>
+                    <div class="text-truncate" style="font-size: 0.85rem;" title="${pub.journal}">
+                        ${pub.journal}
+                    </div>
+                </td>
+                <td style="text-align: center; font-weight: 600;">${pub.year}</td>
+                <td style="text-align: center;">
+                    <span class="badge badge-citation" style="background: rgba(139, 92, 246, 0.15); color: var(--accent-purple); padding: 0.35rem 0.6rem; border-radius: 6px; font-weight: bold; border: 1px solid rgba(139, 92, 246, 0.25);">
+                        ${pub.citations}
+                    </span>
+                </td>
+            `;
+            publicationsTbody.appendChild(tr);
+        });
+    }
+
+    // Pagination Listeners
+    btnPrev.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            renderPublicationsTable();
+        }
+    });
+
+    btnNext.addEventListener('click', () => {
+        const totalItems = filteredResults.filter(pub => {
+            const searchText = pubSearchInput.value.toLowerCase();
+            return (
+                pub.title.toLowerCase().includes(searchText) ||
+                pub.creator.toLowerCase().includes(searchText) ||
+                pub.journal.toLowerCase().includes(searchText) ||
+                pub.authors.some(auth => auth.toLowerCase().includes(searchText))
+            );
+        }).length;
+        
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderPublicationsTable();
+        }
+    });
+
+    // --- RESEARCHERS CARDS LIST ---
+    function renderAuthorsList() {
+        const searchText = authorSearchInput.value.toLowerCase();
+        
+        // Compile author stats (Registered only)
+        const registeredNames = new Set(database.researchers.map(r => r.name.trim().toLowerCase()));
+        const authorStats = {};
+        
+        filteredResults.forEach(pub => {
+            pub.authors.forEach(auth => {
+                const cleanedAuth = auth.trim();
+                if (registeredNames.has(cleanedAuth.toLowerCase())) {
+                    // Find official registry info for department
+                    const regInfo = database.researchers.find(r => r.name.trim().toLowerCase() === cleanedAuth.toLowerCase());
+                    const deptName = regInfo ? regInfo.department : (pub.departments ? pub.departments[0] : "Faculty of Medicine");
+                    
+                    if (!authorStats[cleanedAuth]) {
+                        authorStats[cleanedAuth] = {
+                            name: cleanedAuth,
+                            pubs: 0,
+                            citations: 0,
+                            journals: new Set(),
+                            department: deptName
+                        };
+                    }
+                    authorStats[cleanedAuth].pubs++;
+                    authorStats[cleanedAuth].citations += pub.citations;
+                    authorStats[cleanedAuth].journals.add(pub.journal);
+                }
+            });
+        });
+
+        // Filter and sort authors
+        const sortedAuthors = Object.values(authorStats)
+            .filter(author => author.name.toLowerCase().includes(searchText))
+            .sort((a, b) => b.pubs - a.pubs);
+
+        authorsListGrid.innerHTML = '';
+        
+        if (sortedAuthors.length === 0) {
+            authorsListGrid.innerHTML = `
+                <div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 4rem;">
+                    <i class="fa-solid fa-users-slash" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>
+                    No researchers found matching search text.
+                </div>`;
+            return;
+        }
+
+        sortedAuthors.forEach(author => {
+            const card = document.createElement('div');
+            card.className = 'author-card';
+            
+            // Get initials
+            const initials = author.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+            card.innerHTML = `
+                <div class="author-card-header">
+                    <div class="author-avatar">${initials}</div>
+                    <div class="author-info">
+                        <h4>${author.name}</h4>
+                        <p>${author.department}</p>
+                    </div>
+                </div>
+                <div class="author-stats">
+                    <div class="author-stat-item">
+                        <span class="author-stat-label">Publications</span>
+                        <span class="author-stat-value">${author.pubs}</span>
+                    </div>
+                    <div class="author-stat-item">
+                        <span class="author-stat-label">Total Citations</span>
+                        <span class="author-stat-value" style="color: var(--accent-purple);">${author.citations}</span>
+                    </div>
+                </div>
+            `;
+            
+            // Add Click listener to show modal profile detail
+            card.addEventListener('click', () => {
+                showResearcherModal(author.name, author.department);
+            });
+            
+            authorsListGrid.appendChild(card);
+        });
+    }
+
+    // --- MODAL & PAGE SIZE LOGIC ---
+    // Modal Close handlers
+    modalCloseBtn.addEventListener('click', () => {
+        researcherModal.classList.remove('active');
+    });
+
+    researcherModal.addEventListener('click', (e) => {
+        if (e.target === researcherModal) {
+            researcherModal.classList.remove('active');
+        }
+    });
+
+    // Function to render researcher detail profile inside modal
+    function showResearcherModal(authorName, authorDept) {
+        // Filter publications belonging to this author
+        const authorPapers = database.results.filter(pub => 
+            pub.authors.some(auth => auth.trim().toLowerCase() === authorName.trim().toLowerCase())
+        );
+
+        const totalCites = authorPapers.reduce((sum, pub) => sum + pub.citations, 0);
+        const avgCites = authorPapers.length > 0 ? (totalCites / authorPapers.length).toFixed(1) : 0;
+
+        // Set Profile details
+        modalAuthorName.textContent = authorName;
+        modalAuthorDept.textContent = authorDept;
+        modalAvatar.textContent = authorName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+        modalStatPubs.textContent = authorPapers.length;
+        modalStatCitations.textContent = totalCites.toLocaleString();
+        modalStatAvg.textContent = avgCites;
+
+        // Populate publication list inside modal
+        modalPubList.innerHTML = '';
+        if (authorPapers.length === 0) {
+            modalPubList.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2rem;">No publications recorded.</div>';
+        } else {
+            authorPapers.forEach(paper => {
+                const item = document.createElement('div');
+                item.className = 'modal-pub-item';
+                
+                const doiLink = paper.doi ? `
+                    <a href="https://doi.org/${paper.doi}" target="_blank" class="doi-badge" style="margin-top: 0.4rem; display: inline-flex; align-items: center; gap: 0.3rem;">
+                        <i class="fa-solid fa-link"></i> DOI: ${paper.doi}
+                    </a>` : '';
+
+                item.innerHTML = `
+                    <div class="modal-pub-title">${paper.title}</div>
+                    <div class="modal-pub-meta">
+                        <span><i class="fa-regular fa-folder-open"></i> ${paper.journal} (${paper.year})</span>
+                        <span style="font-weight: 600; color: var(--accent-purple);"><i class="fa-solid fa-quote-right" style="font-size:0.75rem;"></i> Citations: ${paper.citations}</span>
+                    </div>
+                    ${doiLink}
+                `;
+                modalPubList.appendChild(item);
+            });
+        }
+
+        // Show Modal
+        researcherModal.classList.add('active');
+    }
+
+    // Page Size Selector Listener
+    pageSizeSelect.addEventListener('change', () => {
+        const val = pageSizeSelect.value;
+        if (val === 'all') {
+            itemsPerPage = filteredResults.length || 1;
+        } else {
+            itemsPerPage = parseInt(val, 10);
+        }
+        currentPage = 1;
+        renderPublicationsTable();
+    });
+
+    // Function to update visual sorting icons in the headers
+    function updateSortIcons() {
+        const headers = {
+            'title': document.getElementById('th-title'),
+            'author': document.getElementById('th-author'),
+            'journal': document.getElementById('th-journal'),
+            'year': document.getElementById('th-year'),
+            'citations': document.getElementById('th-citations')
+        };
+        
+        for (const [field, el] of Object.entries(headers)) {
+            if (!el) continue;
+            const icon = el.querySelector('i');
+            if (!icon) continue;
+            
+            if (field === sortField) {
+                icon.className = sortDirection === 'asc' ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down';
+                icon.style.opacity = '1';
+            } else {
+                icon.className = 'fa-solid fa-sort';
+                icon.style.opacity = '0.4';
+            }
+        }
+    }
+
+    // Header Sort Event Listeners
+    function handleHeaderClick(field) {
+        if (sortField === field) {
+            sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            sortField = field;
+            sortDirection = (field === 'year' || field === 'citations') ? 'desc' : 'asc';
+        }
+        currentPage = 1;
+        renderPublicationsTable();
+    }
+
+    const thTitle = document.getElementById('th-title');
+    const thAuthor = document.getElementById('th-author');
+    const thJournal = document.getElementById('th-journal');
+    const thYear = document.getElementById('th-year');
+    const thCitations = document.getElementById('th-citations');
+
+    if (thTitle) thTitle.addEventListener('click', () => handleHeaderClick('title'));
+    if (thAuthor) thAuthor.addEventListener('click', () => handleHeaderClick('author'));
+    if (thJournal) thJournal.addEventListener('click', () => handleHeaderClick('journal'));
+    if (thYear) thYear.addEventListener('click', () => handleHeaderClick('year'));
+    if (thCitations) thCitations.addEventListener('click', () => handleHeaderClick('citations'));
+
+    // --- INITIAL BOOTSTRAP ---
+    loadData();
+});
