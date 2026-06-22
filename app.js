@@ -552,28 +552,107 @@ document.addEventListener('DOMContentLoaded', () => {
         pageItems.forEach(pub => {
             const tr = document.createElement('tr');
             
+            // Helper function to format full names or other variations to "Lastname, F."
+            const formatAuthorName = (name) => {
+                if (!name) return '';
+                name = name.trim();
+                if (name.includes(',')) return name;
+                
+                const parts = name.split(/\s+/);
+                if (parts.length === 2) {
+                    const first = parts[0];
+                    const second = parts[1];
+                    // If second part is initials (e.g. S. or S)
+                    if (/^[A-Z]\.?([A-Z]\.?)?$/.test(second)) {
+                        const cleanInitials = second.replace(/\.+/g, '').split('').join('.') + '.';
+                        return `${first}, ${cleanInitials}`;
+                    }
+                }
+                
+                if (parts.length >= 2) {
+                    const last = parts[parts.length - 1];
+                    const first = parts[0];
+                    const initial = first.charAt(0).toUpperCase() + '.';
+                    return `${last}, ${initial}`;
+                }
+                return name;
+            };
+
+            // Helper function for robust corresponding author matching
+            const isCorrespondingAuthor = (authorName, correspondingName) => {
+                if (!authorName || !correspondingName) return false;
+                const aClean = authorName.toLowerCase().replace(/[^a-z\s]/g, '').trim();
+                const cClean = correspondingName.toLowerCase().replace(/[^a-z\s]/g, '').trim();
+                if (aClean === cClean) return true;
+                
+                const aParts = aClean.split(/\s+/);
+                const cParts = cClean.split(/\s+/);
+                if (aParts.length > 0 && cParts.length > 0) {
+                    const aLast = aParts[aParts.length - 1];
+                    const cLast = cParts[cParts.length - 1];
+                    const aFirst = aParts[0];
+                    const cFirst = cParts[0];
+                    if (aLast === cLast && aFirst[0] === cFirst[0]) return true;
+                    if (aParts.includes(cLast) || cParts.includes(aLast)) return true;
+                }
+                return false;
+            };
+
             // Format author tag display, highlighting the corresponding author
             const formattedAuthors = pub.authors.map(author => {
-                const isCorresponding = (pub.corresponding_author && author.trim() === pub.corresponding_author.trim());
+                const isCorresponding = pub.corresponding_author && (
+                    author.trim().toLowerCase() === pub.corresponding_author.trim().toLowerCase() ||
+                    isCorrespondingAuthor(author, pub.corresponding_author)
+                );
+                const formattedName = formatAuthorName(author);
                 if (isCorresponding) {
-                    return `<strong>${author}</strong> <i class="fa-regular fa-envelope" title="Corresponding Author" style="color: var(--accent-purple); cursor: help;" class="corresponding-icon"></i>`;
+                    return `<strong>${formattedName}</strong> <i class="fa-regular fa-envelope" title="Corresponding Author" style="color: var(--accent-purple); cursor: help;" class="corresponding-icon"></i>`;
                 }
-                return author;
+                return formattedName;
             }).join(', ');
             
+            const scopusUrl = pub.doi 
+                ? `https://www.scopus.com/results/results.uri?sot=b&sct=f&sl=20&s=DOI%28${encodeURIComponent(pub.doi)}%29` 
+                : `https://www.scopus.com/results/results.uri?sot=b&sct=f&sl=20&s=TITLE%28${encodeURIComponent(pub.title)}%29`;
+
             const doiSection = pub.doi ? `
                 <a href="https://doi.org/${pub.doi}" target="_blank" class="doi-badge">
                     <i class="fa-solid fa-link"></i> DOI: ${pub.doi}
                 </a>` : '';
 
+            // Compute Faculty of Medicine researchers with superscript numbers
+            const registeredNames = new Set(database.researchers.map(r => r.name.trim().toLowerCase()));
+            const nuResearchers = [];
+            pub.authors.forEach((author, index) => {
+                const cleaned = author.trim().toLowerCase();
+                if (registeredNames.has(cleaned)) {
+                    const regInfo = database.researchers.find(r => r.name.trim().toLowerCase() === cleaned);
+                    const displayName = regInfo ? regInfo.name : author;
+                    const formattedDisplay = formatAuthorName(displayName);
+                    nuResearchers.push(`<span class="researcher-tag-item" style="font-weight: 500; font-size: 0.85rem; color: var(--text-primary);">${formattedDisplay}<sup>${index + 1}</sup></span>`);
+                }
+            });
+            const researcherContent = nuResearchers.length > 0 
+                ? nuResearchers.join(', ') 
+                : `<span style="color: var(--text-muted); font-style: italic;">-</span>`;
+
             tr.innerHTML = `
                 <td>
-                    <span class="title-link" title="${pub.title}">${pub.title}</span>
-                    ${doiSection}
+                    <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                        <div>
+                            <a href="${scopusUrl}" target="_blank" class="title-link" style="margin-bottom: 0; display: inline; font-size: 0.95rem; font-weight: 600;" title="View on Scopus">${pub.title}</a>
+                        </div>
+                        <div class="article-authors" style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">
+                            ${formattedAuthors}
+                        </div>
+                        <div>
+                            ${doiSection}
+                        </div>
+                    </div>
                 </td>
                 <td>
                     <div class="researcher-tags" style="font-size: 0.85rem; line-height: 1.4;">
-                        ${formattedAuthors}
+                        ${researcherContent}
                     </div>
                 </td>
                 <td>
