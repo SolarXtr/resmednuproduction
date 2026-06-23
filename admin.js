@@ -270,18 +270,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- RENDER RESEARCHERS ---
     function renderResearchers() {
-        const query = searchResearcher.value.toLowerCase();
-        let filtered = researchers.filter(r => 
-            r.name.toLowerCase().includes(query) ||
-            r.author_id.includes(query) ||
-            r.department.toLowerCase().includes(query)
-        );
+        // Get active filtered and sorted list
+        const filtered = getFilteredResearchers();
 
         // Render Summary Table
         renderResearcherSummary(filtered);
-
-        // Sort List
-        filtered = sortResearchers(filtered);
 
         researcherTbody.innerHTML = '';
         if (filtered.length === 0) {
@@ -335,35 +328,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- RENDER PUBLICATIONS ---
     function renderPublications() {
-        const query = searchPublication.value.toLowerCase();
-        const yearVal = adminYearFilter ? adminYearFilter.value : 'all';
-        const currentYear = new Date().getFullYear();
-
-        let filtered = publications.filter(pub => {
-            // Text search match
-            const matchText = pub.title.toLowerCase().includes(query) ||
-                pub.journal.toLowerCase().includes(query) ||
-                pub.authors.some(a => a.toLowerCase().includes(query));
-
-            if (!matchText) return false;
-
-            // Year range filters match
-            const pubYear = parseInt(pub.year);
-            if (isNaN(pubYear)) return yearVal === 'all';
-
-            if (yearVal === 'all') return true;
-            if (yearVal === '3y') return pubYear >= (currentYear - 2);
-            if (yearVal === '5y') return pubYear >= (currentYear - 4);
-            if (yearVal === '10y') return pubYear >= (currentYear - 9);
-
-            return pubYear === parseInt(yearVal);
-        });
+        // Get active filtered and sorted list
+        const filtered = getFilteredPublications();
 
         // Render Summary Table
         renderPublicationSummary(filtered);
-
-        // Sort List
-        filtered = sortPublications(filtered);
 
         publicationTbody.innerHTML = '';
         if (filtered.length === 0) {
