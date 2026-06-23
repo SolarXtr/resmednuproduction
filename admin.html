@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal - MedNU Research Dashboard</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main CSS stylesheet (reused styling) -->
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .admin-action-btn {
+            padding: 0.35rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-weight: 600;
+        }
+        .btn-edit {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--accent-blue);
+            border-color: rgba(37, 99, 235, 0.2);
+        }
+        .btn-edit:hover {
+            background: var(--accent-blue);
+            color: #ffffff;
+        }
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+        .btn-delete:hover {
+            background: #ef4444;
+            color: #ffffff;
+        }
+        .admin-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .btn-add {
+            background: var(--accent-teal);
+            color: white;
+            box-shadow: 0 4px 10px rgba(13, 148, 136, 0.15);
+        }
+        .btn-add:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 12px rgba(13, 148, 136, 0.25);
+        }
+        .btn-save-all {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+        .btn-save-all:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+        }
+        .admin-form-group {
+            margin-bottom: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+        .admin-form-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .admin-form-group input, .admin-form-group select, .admin-form-group textarea {
+            padding: 0.6rem 0.8rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: #f8fafc;
+            outline: none;
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            transition: all 0.15s ease;
+        }
+        .admin-form-group input:focus, .admin-form-group select:focus, .admin-form-group textarea:focus {
+            border-color: var(--accent-blue);
+            background: #ffffff;
+            box-shadow: 0 0 8px rgba(37, 99, 235, 0.08);
+        }
+        .toast-notification {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #1e293b;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+            z-index: 9999;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .toast-notification.active {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="glass-bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon" style="background: linear-gradient(135deg, var(--accent-teal), var(--accent-blue));">
+                    <i class="fa-solid fa-user-gear"></i>
+                </div>
+                <div class="logo-text">
+                    <h2>Admin Portal</h2>
+                    <span>Dashboard Manager</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#manage-researchers" class="nav-item active" id="nav-manage-researchers">
+                    <i class="fa-solid fa-user-doctor"></i>
+                    <span>Manage Researchers</span>
+                </a>
+                <a href="#manage-publications" class="nav-item" id="nav-manage-publications">
+                    <i class="fa-solid fa-book-bookmark"></i>
+                    <span>Manage Articles</span>
+                </a>
+                <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1rem 0;">
+                <a href="index.html" class="nav-item">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Back to Dashboard</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="btn btn-save-all" id="btn-global-save">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>Save to JSON Files</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-title">
+                    <h1>Administrator Control Panel</h1>
+                    <p>Modify and update database files (researchers.json / data.json) directly</p>
+                </div>
+            </header>
+
+            <div class="dashboard-scroll-area">
+                <!-- Manage Researchers Section -->
+                <section id="manage-researchers-section" class="dashboard-section active">
+                    <div class="section-card">
+                        <div class="admin-controls">
+                            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                <div class="search-box">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                    <input type="text" id="researcher-admin-search" placeholder="Search Researcher...">
+                                </div>
+                            </div>
+                            <button class="btn btn-add" id="btn-add-researcher">
+                                <i class="fa-solid fa-plus"></i> Add Researcher
+                            </button>
+                        </div>
+
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 25%;">Researcher Name</th>
+                                        <th style="width: 20%;">Scopus Author ID</th>
+                                        <th style="width: 30%;">Department</th>
+                                        <th style="width: 10%;">Status</th>
+                                        <th style="width: 15%; text-align: center;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="researcher-admin-tbody">
+                                    <!-- Dynamic Rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Manage Publications Section -->
+                <section id="manage-publications-section" class="dashboard-section">
+                    <div class="section-card">
+                        <div class="admin-controls">
+                            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                <div class="search-box">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                    <input type="text" id="publication-admin-search" placeholder="Search Articles...">
+                                </div>
+                            </div>
+                            <button class="btn btn-add" id="btn-add-publication">
+                                <i class="fa-solid fa-plus"></i> Add New Article
+                            </button>
+                        </div>
+
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 45%;">Article Details</th>
+                                        <th style="width: 20%;">Journal</th>
+                                        <th style="width: 10%; text-align: center;">Year</th>
+                                        <th style="width: 10%; text-align: center;">Citations</th>
+                                        <th style="width: 15%; text-align: center;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="publication-admin-tbody">
+                                    <!-- Dynamic Rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Researcher Modal -->
+    <div class="modal-overlay" id="researcher-form-modal">
+        <div class="modal-card" style="max-width: 500px;">
+            <button class="modal-close" id="researcher-modal-close">&times;</button>
+            <h3 id="researcher-modal-title" style="font-family: var(--font-heading); margin-bottom: 1.5rem;">Add Researcher</h3>
+            
+            <form id="researcher-form">
+                <input type="hidden" id="researcher-idx">
+                <div class="admin-form-group">
+                    <label for="res-name">Researcher Name (Full English name)</label>
+                    <input type="text" id="res-name" required placeholder="e.g. Suwannee Uthaisangsook">
+                </div>
+                <div class="admin-form-group">
+                    <label for="res-id">Scopus Author ID</label>
+                    <input type="text" id="res-id" required placeholder="e.g. 6506446785">
+                </div>
+                <div class="admin-form-group">
+                    <label for="res-dept">Department</label>
+                    <input type="text" id="res-dept" required placeholder="e.g. Department of Pediatrics">
+                </div>
+                <div class="admin-form-group">
+                    <label for="res-status">Status</label>
+                    <select id="res-status">
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                    </select>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem;">
+                    <button type="button" class="btn btn-nav" id="btn-cancel-researcher">Cancel</button>
+                    <button type="submit" class="btn btn-add" style="background: var(--accent-blue);">Save Details</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Publication Modal -->
+    <div class="modal-overlay" id="publication-form-modal">
+        <div class="modal-card" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
+            <button class="modal-close" id="publication-modal-close">&times;</button>
+            <h3 id="publication-modal-title" style="font-family: var(--font-heading); margin-bottom: 1.5rem;">Add Article</h3>
+            
+            <form id="publication-form">
+                <input type="hidden" id="publication-idx">
+                <div class="admin-form-group">
+                    <label for="pub-title-input">Article Title</label>
+                    <textarea id="pub-title-input" rows="3" required placeholder="Enter the complete title of the article..."></textarea>
+                </div>
+                <div class="admin-form-group">
+                    <label for="pub-authors-input">Authors list (separated by comma)</label>
+                    <input type="text" id="pub-authors-input" required placeholder="e.g. Uthaisangsook S., Inkate S.">
+                    <small style="color: var(--text-muted); font-size: 0.75rem;">Tip: Use format 'Lastname F.' or full name matching researchers.json</small>
+                </div>
+                <div class="admin-form-group">
+                    <label for="pub-corr-input">Corresponding Author name</label>
+                    <input type="text" id="pub-corr-input" placeholder="e.g. Uthaisangsook S.">
+                </div>
+                <div class="admin-form-group">
+                    <label for="pub-journal-input">Journal Name</label>
+                    <input type="text" id="pub-journal-input" required placeholder="e.g. Journal of Clinical Medicine">
+                </div>
+                <div class="admin-form-group">
+                    <label for="pub-year-input">Publication Year</label>
+                    <input type="number" id="pub-year-input" required min="1990" max="2030" placeholder="2026">
+                </div>
+                <div class="admin-form-group">
+                    <label for="pub-citations-input">Citations Count</label>
+                    <input type="number" id="pub-citations-input" min="0" value="0">
+                </div>
+                <div class="admin-form-group">
+                    <label for="pub-doi-input">DOI</label>
+                    <input type="text" id="pub-doi-input" placeholder="e.g. 10.3390/jcm15113990">
+                </div>
+                <div class="admin-form-group">
+                    <label>Database Source</label>
+                    <div style="display: flex; gap: 1rem; font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                        <label style="display: inline-flex; align-items: center; gap: 0.25rem; font-weight: normal; cursor: pointer;">
+                            <input type="checkbox" id="db-scopus" checked> Scopus
+                        </label>
+                        <label style="display: inline-flex; align-items: center; gap: 0.25rem; font-weight: normal; cursor: pointer;">
+                            <input type="checkbox" id="db-pubmed"> PubMed
+                        </label>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem;">
+                    <button type="button" class="btn btn-nav" id="btn-cancel-publication">Cancel</button>
+                    <button type="submit" class="btn btn-add" style="background: var(--accent-blue);">Save Details</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast UI element -->
+    <div class="toast-notification" id="toast-el">
+        <i class="fa-solid fa-circle-check" style="color: var(--accent-teal);"></i>
+        <span id="toast-msg">Database saved successfully</span>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
