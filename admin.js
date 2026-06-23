@@ -22,6 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchResearcher = document.getElementById('researcher-admin-search');
     const searchPublication = document.getElementById('publication-admin-search');
     const adminYearFilter = document.getElementById('admin-year-filter');
+    const adminResStatusFilter = document.getElementById('admin-res-status-filter');
+    const adminResDeptFilter = document.getElementById('admin-res-dept-filter');
 
     const researcherSummaryContainer = document.getElementById('researcher-summary-container');
     const publicationSummaryContainer = document.getElementById('publication-summary-container');
@@ -85,6 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
             }
             populateYearDropdown();
+            populateResearcherFilters();
             renderResearchers();
             renderPublications();
         } catch (err) {
@@ -107,6 +110,18 @@ document.addEventListener('DOMContentLoaded', () => {
             opt.value = y;
             opt.textContent = `Year ${y}`;
             adminYearFilter.appendChild(opt);
+        });
+    }
+
+    function populateResearcherFilters() {
+        if (!adminResDeptFilter) return;
+        adminResDeptFilter.innerHTML = `<option value="all">All Departments</option>`;
+        const depts = [...new Set(researchers.map(r => r.department))].filter(d => d).sort();
+        depts.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d;
+            opt.textContent = d;
+            adminResDeptFilter.appendChild(opt);
         });
     }
 
@@ -569,11 +584,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getFilteredResearchers() {
         const query = searchResearcher.value.toLowerCase();
-        let filtered = researchers.filter(r => 
-            r.name.toLowerCase().includes(query) ||
-            r.author_id.includes(query) ||
-            r.department.toLowerCase().includes(query)
-        );
+        const statusVal = adminResStatusFilter ? adminResStatusFilter.value : 'all';
+        const deptVal = adminResDeptFilter ? adminResDeptFilter.value : 'all';
+
+        let filtered = researchers.filter(r => {
+            const matchText = r.name.toLowerCase().includes(query) ||
+                r.author_id.includes(query) ||
+                r.department.toLowerCase().includes(query);
+
+            if (!matchText) return false;
+
+            const matchStatus = (statusVal === 'all') || (r.status === statusVal);
+            const matchDept = (deptVal === 'all') || (r.department === deptVal);
+
+            return matchStatus && matchDept;
+        });
         return sortResearchers(filtered);
     }
 
@@ -582,6 +607,12 @@ document.addEventListener('DOMContentLoaded', () => {
     searchPublication.addEventListener('input', renderPublications);
     if (adminYearFilter) {
         adminYearFilter.addEventListener('change', renderPublications);
+    }
+    if (adminResStatusFilter) {
+        adminResStatusFilter.addEventListener('change', renderResearchers);
+    }
+    if (adminResDeptFilter) {
+        adminResDeptFilter.addEventListener('change', renderResearchers);
     }
 
     // --- SORT CLICK EVENT LISTENERS ---
@@ -782,6 +813,124 @@ document.addEventListener('DOMContentLoaded', () => {
     // PDF / Print Layout Exporter
     if (btnExportPdf) {
         btnExportPdf.addEventListener('click', () => {
+            const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            document.querySelector('.main-content').setAttribute('data-date', today);
+            window.print();
+        });
+    }
+
+    // --- RESEARCHERS EXPORT HANDLERS ---
+    const btnExportResCsv = document.getElementById('btn-export-res-csv');
+    const btnExportResWord = document.getElementById('btn-export-res-word');
+    const btnExportResPdf = document.getElementById('btn-export-res-pdf');
+
+    if (btnExportResCsv) {
+        btnExportResCsv.addEventListener('click', () => {
+            const csvContent = [];
+            csvContent.push(["Name", "Scopus Author ID", "Department", "Status"].map(h => `"${h.replace(/"/g, '""')}"`).join(","));
+            
+            const activeRes = getFilteredResearchers();
+            activeRes.forEach(r => {
+                csvContent.push([
+                    r.name || "",
+                    r.author_id || "",
+                    r.department || "",
+                    r.status || "Active"
+                ].map(field => `"${String(field).replace(/"/g, '""')}"`).join(","));
+            });
+
+            const blob = new Blob(["\ufeff" + csvContent.join("\n")], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `mednu_researchers_report_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("Researchers CSV Exported successfully!");
+        });
+    }
+
+    if (btnExportResWord) {
+        btnExportResWord.addEventListener('click', () => {
+            const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            const activeRes = getFilteredResearchers();
+            
+            let html = `
+            <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+            <head>
+                <title>Researchers Directory Report</title>
+                <!--[if gte mso 9]>
+                <xml>
+                    <w:WordDocument>
+                        <w:View>Print</w:View>
+                        <w:Zoom>100</w:Zoom>
+                    </w:WordDocument>
+                </xml>
+                <![endif]-->
+                <style>
+                    body { font-family: 'Arial', sans-serif; line-height: 1.5; color: #333333; }
+                    h1 { color: #0d9488; border-bottom: 2px solid #0d9488; padding-bottom: 10px; font-size: 20pt; }
+                    .meta { font-size: 10pt; color: #666666; margin-bottom: 20px; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                    th, td { border: 1px solid #cbd5e1; padding: 8px 10px; font-size: 10pt; text-align: left; }
+                    th { background-color: #f1f5f9; font-weight: bold; color: #0f172a; }
+                    .name { font-weight: bold; }
+                </style>
+            </head>
+            <body>
+                <h1>Researchers Directory Report</h1>
+                <div class="meta">
+                    <strong>Faculty of Medicine, Naresuan University</strong><br/>
+                    Generated on: ${dateStr}<br/>
+                    Total Filtered Researchers: ${activeRes.length}
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 5%">No.</th>
+                            <th style="width: 35%">Name</th>
+                            <th style="width: 25%">Scopus ID</th>
+                            <th style="width: 25%">Department</th>
+                            <th style="width: 10%">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            activeRes.forEach((r, idx) => {
+                html += `
+                        <tr>
+                            <td>${idx + 1}</td>
+                            <td class="name">${r.name}</td>
+                            <td><code>${r.author_id}</code></td>
+                            <td>${r.department}</td>
+                            <td style="text-align: center;">${r.status}</td>
+                        </tr>
+                `;
+            });
+            
+            html += `
+                    </tbody>
+                </table>
+            </body>
+            </html>
+            `;
+
+            const blob = new Blob(["\ufeff" + html], { type: "application/msword" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `mednu_researchers_report_${new Date().toISOString().split('T')[0]}.doc`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("Researchers Word Report Exported successfully!");
+        });
+    }
+
+    if (btnExportResPdf) {
+        btnExportResPdf.addEventListener('click', () => {
             const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
             document.querySelector('.main-content').setAttribute('data-date', today);
             window.print();

@@ -175,15 +175,40 @@
                 <section id="manage-researchers-section" class="dashboard-section active">
                     <div class="section-card">
                         <div class="admin-controls">
-                            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
                                 <div class="search-box">
                                     <i class="fa-solid fa-magnifying-glass"></i>
                                     <input type="text" id="researcher-admin-search" placeholder="Search Researcher...">
                                 </div>
+                                <div class="filter-group" style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <label for="admin-res-status-filter" style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);"><i class="fa-solid fa-filter"></i> Status:</label>
+                                    <select id="admin-res-status-filter" style="padding: 0.5rem 0.8rem; border-radius: 8px; border: 1px solid var(--border-color); background: #f8fafc; font-size: 0.85rem; outline: none; font-family: var(--font-body); font-weight: 500;">
+                                        <option value="all">All Status</option>
+                                        <option value="Active">Active</option>
+                                        <option value="Inactive">Inactive</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group" style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <label for="admin-res-dept-filter" style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);"><i class="fa-solid fa-building"></i> Dept:</label>
+                                    <select id="admin-res-dept-filter" style="padding: 0.5rem 0.8rem; border-radius: 8px; border: 1px solid var(--border-color); background: #f8fafc; font-size: 0.85rem; outline: none; font-family: var(--font-body); font-weight: 500;">
+                                        <option value="all">All Departments</option>
+                                    </select>
+                                </div>
                             </div>
-                            <button class="btn btn-add" id="btn-add-researcher">
-                                <i class="fa-solid fa-plus"></i> Add Researcher
-                            </button>
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+                                <button class="btn btn-nav" id="btn-export-res-csv" style="background: rgba(13, 148, 136, 0.1); color: var(--accent-teal); border: 1px solid rgba(13, 148, 136, 0.2); font-weight: 600; font-size: 0.85rem; padding: 0.5rem 0.8rem;">
+                                    <i class="fa-solid fa-file-csv"></i> Export CSV
+                                </button>
+                                <button class="btn btn-nav" id="btn-export-res-word" style="background: rgba(37, 99, 235, 0.1); color: var(--accent-blue); border: 1px solid rgba(37, 99, 235, 0.2); font-weight: 600; font-size: 0.85rem; padding: 0.5rem 0.8rem;">
+                                    <i class="fa-solid fa-file-word"></i> Export Word
+                                </button>
+                                <button class="btn btn-nav" id="btn-export-res-pdf" style="background: rgba(124, 58, 237, 0.1); color: var(--accent-purple); border: 1px solid rgba(124, 58, 237, 0.2); font-weight: 600; font-size: 0.85rem; padding: 0.5rem 0.8rem;">
+                                    <i class="fa-solid fa-file-pdf"></i> Print PDF
+                                </button>
+                                <button class="btn btn-add" id="btn-add-researcher" style="padding: 0.5rem 0.8rem; font-size: 0.85rem;">
+                                    <i class="fa-solid fa-plus"></i> Add Researcher
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Summary Table for Researchers -->
