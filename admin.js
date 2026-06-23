@@ -371,6 +371,53 @@ document.addEventListener('DOMContentLoaded', () => {
         return false;
     };
 
+    const formatAuthorsWithEtAl = (authors, correspondingAuthor) => {
+        if (!authors || authors.length === 0) return '';
+        
+        // Helper to format name
+        const formatName = (name) => formatAuthorName(name);
+
+        if (authors.length < 4) {
+            return authors.map(author => {
+                const isCorresponding = correspondingAuthor && (
+                    author.trim().toLowerCase() === correspondingAuthor.trim().toLowerCase() ||
+                    isCorrespondingAuthor(author, correspondingAuthor)
+                );
+                const formattedName = formatName(author);
+                if (isCorresponding) {
+                    return `<strong>${formattedName}</strong> <i class="fa-regular fa-envelope" title="Corresponding Author" style="color: var(--accent-purple); cursor: help;"></i>`;
+                }
+                return formattedName;
+            }).join(', ');
+        }
+
+        // 4 or more authors
+        const firstAuthor = authors[0];
+        const isFirstCorresponding = correspondingAuthor && (
+            firstAuthor.trim().toLowerCase() === correspondingAuthor.trim().toLowerCase() ||
+            isCorrespondingAuthor(firstAuthor, correspondingAuthor)
+        );
+
+        let corrAuthor = null;
+        if (correspondingAuthor) {
+            corrAuthor = authors.find((auth, idx) => idx > 0 && (
+                auth.trim().toLowerCase() === correspondingAuthor.trim().toLowerCase() ||
+                isCorrespondingAuthor(auth, correspondingAuthor)
+            ));
+        }
+
+        const firstDisplay = isFirstCorresponding 
+            ? `<strong>${formatName(firstAuthor)}</strong> <i class="fa-regular fa-envelope" title="Corresponding Author" style="color: var(--accent-purple); cursor: help;"></i>` 
+            : formatName(firstAuthor);
+
+        if (corrAuthor) {
+            const corrDisplay = `<strong>${formatName(corrAuthor)}</strong> <i class="fa-regular fa-envelope" title="Corresponding Author" style="color: var(--accent-purple); cursor: help;"></i>`;
+            return `${firstDisplay}, ${corrDisplay}, et al.`;
+        }
+
+        return `${firstDisplay}, et al.`;
+    };
+
     // --- RENDER PUBLICATIONS ---
     function renderPublications() {
         // Get active filtered and sorted list
@@ -401,18 +448,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 return `<span class="db-badge ${badgeClass}" style="font-size:0.6rem; padding:0.1rem 0.3rem;">${cleanDb}</span>`;
             }).join(' ');
 
-            // Format author tag display, highlighting the corresponding author
-            const formattedAuthors = pub.authors.map(author => {
-                const isCorresponding = pub.corresponding_author && (
-                    author.trim().toLowerCase() === pub.corresponding_author.trim().toLowerCase() ||
-                    isCorrespondingAuthor(author, pub.corresponding_author)
-                );
-                const formattedName = formatAuthorName(author);
-                if (isCorresponding) {
-                    return `<strong>${formattedName}</strong> <i class="fa-regular fa-envelope" title="Corresponding Author" style="color: var(--accent-purple); cursor: help;"></i>`;
-                }
-                return formattedName;
-            }).join(', ');
+            // Format authors list using et al. logic
+            const formattedAuthors = formatAuthorsWithEtAl(pub.authors, pub.corresponding_author);
 
             tr.innerHTML = `
                 <td>
