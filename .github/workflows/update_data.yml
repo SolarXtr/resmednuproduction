@@ -1,0 +1,83 @@
+name: Monthly Research Data Update
+
+on:
+  schedule:
+    # Run at 00:00 UTC (07:00 ICT) on the 15th of every month
+    - cron: '0 0 15 * *'
+  workflow_dispatch: # Allows manual triggering from the GitHub Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Fetch data from Scopus
+        run: python fetch_data.py
+
+      - name: Fill missing authors using PubMed
+        run: python fill_with_pubmed.py
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
+          git add data.json
+          git diff-index --quiet HEAD || (git commit -m "Auto-update publication data [skip ci]" && git push)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Send success email
+        if: success()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "Scopus-PubMed Dashboard Update: SUCCESS"
+          to: tinnakornh@nu.ac.th
+          from: MedNU Research Analytics Bot <actions@github.com>
+          body: |
+            Dear Administrator,
+            
+            The monthly publication data update pipeline has completed successfully.
+            The latest publication dataset has been fetched, processed, and pushed to the repository.
+            
+            Best regards,
+            MedNU Research Analytics Bot
+
+      - name: Send failure email
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "Scopus-PubMed Dashboard Update: FAILED"
+          to: tinnakornh@nu.ac.th
+          from: MedNU Research Analytics Bot <actions@github.com>
+          body: |
+            Dear Administrator,
+            
+            WARNING: The monthly publication data update pipeline FAILED.
+            Please check the workflow execution logs at:
+            https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            
+            Best regards,
+            MedNU Research Analytics Bot
