@@ -215,9 +215,20 @@
                                     <input type="text" id="publication-admin-search" placeholder="Search Articles...">
                                 </div>
                             </div>
-                            <button class="btn btn-add" id="btn-add-publication">
-                                <i class="fa-solid fa-plus"></i> Add New Article
-                            </button>
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+                                <button class="btn btn-nav" id="btn-export-csv" style="background: rgba(13, 148, 136, 0.1); color: var(--accent-teal); border: 1px solid rgba(13, 148, 136, 0.2); font-weight: 600; font-size: 0.85rem; padding: 0.5rem 0.8rem;">
+                                    <i class="fa-solid fa-file-csv"></i> Export CSV
+                                </button>
+                                <button class="btn btn-nav" id="btn-export-word" style="background: rgba(37, 99, 235, 0.1); color: var(--accent-blue); border: 1px solid rgba(37, 99, 235, 0.2); font-weight: 600; font-size: 0.85rem; padding: 0.5rem 0.8rem;">
+                                    <i class="fa-solid fa-file-word"></i> Export Word
+                                </button>
+                                <button class="btn btn-nav" id="btn-export-pdf" style="background: rgba(124, 58, 237, 0.1); color: var(--accent-purple); border: 1px solid rgba(124, 58, 237, 0.2); font-weight: 600; font-size: 0.85rem; padding: 0.5rem 0.8rem;">
+                                    <i class="fa-solid fa-file-pdf"></i> Print PDF
+                                </button>
+                                <button class="btn btn-add" id="btn-add-publication" style="padding: 0.5rem 0.8rem; font-size: 0.85rem;">
+                                    <i class="fa-solid fa-plus"></i> Add New Article
+                                </button>
+                            </div>
                         </div>
 
                         <div class="table-container">

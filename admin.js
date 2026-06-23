@@ -397,6 +397,134 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // --- REPORT GENERATION EXPORTS ---
+    const btnExportCsv = document.getElementById('btn-export-csv');
+    const btnExportWord = document.getElementById('btn-export-word');
+    const btnExportPdf = document.getElementById('btn-export-pdf');
+
+    // CSV Exporter
+    if (btnExportCsv) {
+        btnExportCsv.addEventListener('click', () => {
+            const csvContent = [];
+            // Headers
+            csvContent.push(["Title", "Authors", "Corresponding Author", "Journal", "Year", "Citations", "DOI", "Databases", "Departments"].map(h => `"${h.replace(/"/g, '""')}"`).join(","));
+            // Rows
+            publications.forEach(pub => {
+                csvContent.push([
+                    pub.title || "",
+                    pub.authors ? pub.authors.join("; ") : "",
+                    pub.corresponding_author || "",
+                    pub.journal || "",
+                    pub.year || "",
+                    pub.citations || "0",
+                    pub.doi || "",
+                    pub.databases ? pub.databases.join("; ") : "Scopus",
+                    pub.departments ? pub.departments.join("; ") : ""
+                ].map(field => `"${String(field).replace(/"/g, '""')}"`).join(","));
+            });
+
+            const blob = new Blob(["\ufeff" + csvContent.join("\n")], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `mednu_publications_report_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("CSV Exported successfully!");
+        });
+    }
+
+    // Word Exporter (HTML .doc trick)
+    if (btnExportWord) {
+        btnExportWord.addEventListener('click', () => {
+            const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            let html = `
+            <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+            <head>
+                <title>Research Publications Report</title>
+                <!--[if gte mso 9]>
+                <xml>
+                    <w:WordDocument>
+                        <w:View>Print</w:View>
+                        <w:Zoom>100</w:Zoom>
+                    </w:WordDocument>
+                </xml>
+                <![endif]-->
+                <style>
+                    body { font-family: 'Arial', sans-serif; line-height: 1.5; color: #333333; }
+                    h1 { color: #1e3a8a; border-bottom: 2px solid #1e3a8a; padding-bottom: 10px; font-size: 20pt; }
+                    .meta { font-size: 10pt; color: #666666; margin-bottom: 20px; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                    th, td { border: 1px solid #cbd5e1; padding: 8px 10px; font-size: 10pt; text-align: left; }
+                    th { background-color: #f1f5f9; font-weight: bold; color: #0f172a; }
+                    .title { font-weight: bold; }
+                    .authors { font-style: italic; color: #4b5563; }
+                </style>
+            </head>
+            <body>
+                <h1>Research Publications Report</h1>
+                <div class="meta">
+                    <strong>Faculty of Medicine, Naresuan University</strong><br/>
+                    Generated on: ${dateStr}<br/>
+                    Total Publications: ${publications.length}
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 5%">No.</th>
+                            <th style="width: 45%">Title & Authors</th>
+                            <th style="width: 30%">Journal</th>
+                            <th style="width: 10%">Year</th>
+                            <th style="width: 10%">Citations</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            publications.forEach((pub, idx) => {
+                html += `
+                        <tr>
+                            <td>${idx + 1}</td>
+                            <td>
+                                <div class="title">${pub.title}</div>
+                                <div class="authors">${pub.authors ? pub.authors.join(', ') : ''}</div>
+                            </td>
+                            <td>${pub.journal}</td>
+                            <td style="text-align: center;">${pub.year}</td>
+                            <td style="text-align: center;">${pub.citations}</td>
+                        </tr>
+                `;
+            });
+            
+            html += `
+                    </tbody>
+                </table>
+            </body>
+            </html>
+            `;
+
+            const blob = new Blob(["\ufeff" + html], { type: "application/msword" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `mednu_publications_report_${new Date().toISOString().split('T')[0]}.doc`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("Word Report Exported successfully!");
+        });
+    }
+
+    // PDF / Print Layout Exporter
+    if (btnExportPdf) {
+        btnExportPdf.addEventListener('click', () => {
+            const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            document.querySelector('.main-content').setAttribute('data-date', today);
+            window.print();
+        });
+    }
+
     // Helper to stringify with nice format and preserving thai unicode if any
     function jsonStringifyWithUnicode(obj) {
         return JSON.stringify(obj, null, 2);
