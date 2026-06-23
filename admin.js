@@ -326,6 +326,51 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Helper function to format full names or other variations to "Lastname, F."
+    const formatAuthorName = (name) => {
+        if (!name) return '';
+        name = name.trim();
+        if (name.includes(',')) return name;
+        
+        const parts = name.split(/\s+/);
+        if (parts.length === 2) {
+            const first = parts[0];
+            const second = parts[1];
+            if (/^[A-Z]\.?([A-Z]\.?)?$/.test(second)) {
+                const cleanInitials = second.replace(/\.+/g, '').split('').join('.') + '.';
+                return `${first}, ${cleanInitials}`;
+            }
+        }
+        
+        if (parts.length >= 2) {
+            const last = parts[parts.length - 1];
+            const first = parts[0];
+            const initial = first.charAt(0).toUpperCase() + '.';
+            return `${last}, ${initial}`;
+        }
+        return name;
+    };
+
+    // Helper function for corresponding author matching
+    const isCorrespondingAuthor = (authorName, correspondingName) => {
+        if (!authorName || !correspondingName) return false;
+        const aClean = authorName.toLowerCase().replace(/[^a-z\s]/g, '').trim();
+        const cClean = correspondingName.toLowerCase().replace(/[^a-z\s]/g, '').trim();
+        if (aClean === cClean) return true;
+        
+        const aParts = aClean.split(/\s+/);
+        const cParts = cClean.split(/\s+/);
+        if (aParts.length > 0 && cParts.length > 0) {
+            const aLast = aParts[aParts.length - 1];
+            const cLast = cParts[cParts.length - 1];
+            const aFirst = aParts[0];
+            const cFirst = cParts[0];
+            if (aLast === cLast && aFirst[0] === cFirst[0]) return true;
+            if (aParts.includes(cLast) || cParts.includes(aLast)) return true;
+        }
+        return false;
+    };
+
     // --- RENDER PUBLICATIONS ---
     function renderPublications() {
         // Get active filtered and sorted list
@@ -356,11 +401,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 return `<span class="db-badge ${badgeClass}" style="font-size:0.6rem; padding:0.1rem 0.3rem;">${cleanDb}</span>`;
             }).join(' ');
 
+            // Format author tag display, highlighting the corresponding author
+            const formattedAuthors = pub.authors.map(author => {
+                const isCorresponding = pub.corresponding_author && (
+                    author.trim().toLowerCase() === pub.corresponding_author.trim().toLowerCase() ||
+                    isCorrespondingAuthor(author, pub.corresponding_author)
+                );
+                const formattedName = formatAuthorName(author);
+                if (isCorresponding) {
+                    return `<strong>${formattedName}</strong> <i class="fa-regular fa-envelope" title="Corresponding Author" style="color: var(--accent-purple); cursor: help;"></i>`;
+                }
+                return formattedName;
+            }).join(', ');
+
             tr.innerHTML = `
                 <td>
                     <div style="font-weight:600; font-size:0.9rem; line-height:1.4;">${pub.title}</div>
                     <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.2rem;">
-                        ${pub.authors.join(', ')}
+                        ${formattedAuthors}
                     </div>
                     <div style="display:flex; align-items:center; gap:0.5rem; margin-top:0.3rem;">
                         ${doiSection}
