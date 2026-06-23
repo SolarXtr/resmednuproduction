@@ -755,14 +755,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     No researchers found matching search text.
                 </div>`;
             return;
-        }
-
-        sortedAuthors.forEach(author => {
+        }        sortedAuthors.forEach(author => {
             const card = document.createElement('div');
             card.className = 'author-card';
             
             // Get initials
             const initials = author.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+            // Find registry info for orcid
+            const regInfo = database.researchers.find(r => r.name.trim().toLowerCase() === author.name.toLowerCase());
+            const orcidUrl = (regInfo && regInfo.orcid) 
+                ? `https://orcid.org/${regInfo.orcid}`
+                : `https://orcid.org/orcid-search/search?searchQuery=${encodeURIComponent(author.name)}`;
 
             card.innerHTML = `
                 <div class="author-card-header">
@@ -770,6 +774,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="author-info">
                         <h4>${author.name}</h4>
                         <p>${author.department}</p>
+                        <div style="margin-top: 0.3rem;">
+                            <a href="${orcidUrl}" target="_blank" class="orcid-link" style="color: #a6ce39; font-size: 0.8rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem; z-index: 10;">
+                                <i class="fa-brands fa-orcid" style="font-size: 0.95rem;"></i> ORCID Profile
+                            </a>
+                        </div>
                     </div>
                 </div>
                 <div class="author-stats">
@@ -788,6 +797,14 @@ document.addEventListener('DOMContentLoaded', () => {
             card.addEventListener('click', () => {
                 showResearcherModal(author.name, author.department);
             });
+
+            // Prevent modal popup when clicking the ORCID link
+            const orcidLink = card.querySelector('.orcid-link');
+            if (orcidLink) {
+                orcidLink.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            }
             
             authorsListGrid.appendChild(card);
         });
