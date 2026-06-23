@@ -4,6 +4,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let publications = [];
     let dbMetadata = {}; // to keep retrieve time, affiliation etc.
 
+    // Sorting state
+    let pubSortField = 'year';
+    let pubSortDir = 'desc';
+    let resSortField = 'name';
+    let resSortDir = 'asc';
+
     // DOM Elements
     const navResearchers = document.getElementById('nav-manage-researchers');
     const navPublications = document.getElementById('nav-manage-publications');
@@ -15,6 +21,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const searchResearcher = document.getElementById('researcher-admin-search');
     const searchPublication = document.getElementById('publication-admin-search');
+    const adminYearFilter = document.getElementById('admin-year-filter');
+
+    const researcherSummaryContainer = document.getElementById('researcher-summary-container');
+    const publicationSummaryContainer = document.getElementById('publication-summary-container');
 
     const btnGlobalSave = document.getElementById('btn-global-save');
 
@@ -74,12 +84,30 @@ document.addEventListener('DOMContentLoaded', () => {
                     researchers: db.researchers || []
                 };
             }
+            populateYearDropdown();
             renderResearchers();
             renderPublications();
         } catch (err) {
             console.error("Error loading data:", err);
             showToast("Failed to load databases", "error");
         }
+    }
+
+    function populateYearDropdown() {
+        if (!adminYearFilter) return;
+        adminYearFilter.innerHTML = `
+            <option value="all">All Years</option>
+            <option value="3y">Past 3 Years</option>
+            <option value="5y">Past 5 Years</option>
+            <option value="10y">Past 10 Years</option>
+        `;
+        const years = [...new Set(publications.map(p => parseInt(p.year)))].filter(y => !isNaN(y)).sort((a, b) => b - a);
+        years.forEach(y => {
+            const opt = document.createElement('option');
+            opt.value = y;
+            opt.textContent = `Year ${y}`;
+            adminYearFilter.appendChild(opt);
+        });
     }
 
     // --- TOAST NOTIFICATIONS ---
@@ -98,14 +126,147 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     }
 
+    // --- RESEARCHER SUMMARIZATION ---
+    function renderResearcherSummary(filteredRes) {
+        if (!researcherSummaryContainer) return;
+        const deptGroups = {};
+        filteredRes.forEach(r => {
+            const dept = r.department || "Faculty of Medicine";
+            if (!deptGroups[dept]) {
+                deptGroups[dept] = { active: 0, inactive: 0 };
+            }
+            if (r.status === 'Active') {
+                deptGroups[dept].active++;
+            } else {
+                deptGroups[dept].inactive++;
+            }
+        });
+
+        let html = `
+            <table class="summary-table">
+                <thead>
+                    <tr>
+                        <th>Department / Division</th>
+                        <th style="width: 20%; text-align: center;">Active Researchers</th>
+                        <th style="width: 20%; text-align: center;">Inactive Researchers</th>
+                        <th style="width: 20%; text-align: center;">Total Researchers</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        const depts = Object.keys(deptGroups).sort();
+        if (depts.length === 0) {
+            html += `<tr><td colspan="4" style="text-align:center; color: var(--text-muted);">No researchers to summarize</td></tr>`;
+        } else {
+            depts.forEach(d => {
+                const g = deptGroups[d];
+                html += `
+                    <tr>
+                        <td><strong>${d}</strong></td>
+                        <td style="text-align: center;"><span style="color:var(--accent-teal); font-weight:600;">${g.active}</span></td>
+                        <td style="text-align: center;"><span style="color:var(--text-muted);">${g.inactive}</span></td>
+                        <td style="text-align: center;"><strong>${g.active + g.inactive}</strong></td>
+                    </tr>
+                `;
+            });
+        }
+        html += `</tbody></table>`;
+        researcherSummaryContainer.innerHTML = html;
+    }
+
+    // --- PUBLICATION SUMMARIZATION ---
+    function renderPublicationSummary(filteredPubs) {
+        if (!publicationSummaryContainer) return;
+        const yearGroups = {};
+        filteredPubs.forEach(pub => {
+            const y = pub.year || "Unknown";
+            if (!yearGroups[y]) {
+                yearGroups[y] = { count: 0, citations: 0 };
+            }
+            yearGroups[y].count++;
+            yearGroups[y].citations += parseInt(pub.citations) || 0;
+        });
+
+        const sortedYears = Object.keys(yearGroups).sort((a, b) => b - a);
+        let html = `
+            <table class="summary-table">
+                <thead>
+                    <tr>
+                        <th>Year</th>
+                        <th style="width: 25%; text-align: center;">Total Articles</th>
+                        <th style="width: 25%; text-align: center;">Total Citations</th>
+                        <th style="width: 25%; text-align: center;">Average Citations per Article</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        if (sortedYears.length === 0) {
+            html += `<tr><td colspan="4" style="text-align:center; color: var(--text-muted);">No articles to summarize</td></tr>`;
+        } else {
+            sortedYears.forEach(y => {
+                const g = yearGroups[y];
+                const avg = g.count > 0 ? (g.citations / g.count).toFixed(2) : 0;
+                html += `
+                    <tr>
+                        <td><strong>${y}</strong></td>
+                        <td style="text-align: center;">${g.count}</td>
+                        <td style="text-align: center;">${g.citations}</td>
+                        <td style="text-align: center;">${avg}</td>
+                    </tr>
+                `;
+            });
+        }
+        html += `</tbody></table>`;
+        publicationSummaryContainer.innerHTML = html;
+    }
+
+    // --- SORTING HELPERS ---
+    function sortResearchers(list) {
+        return list.sort((a, b) => {
+            let valA = (a[resSortField] || '').toLowerCase();
+            let valB = (b[resSortField] || '').toLowerCase();
+            if (valA < valB) return resSortDir === 'asc' ? -1 : 1;
+            if (valA > valB) return resSortDir === 'asc' ? 1 : -1;
+            return 0;
+        });
+    }
+
+    function sortPublications(list) {
+        return list.sort((a, b) => {
+            let valA, valB;
+            if (pubSortField === 'title') {
+                valA = (a.title || '').toLowerCase();
+                valB = (b.title || '').toLowerCase();
+            } else if (pubSortField === 'journal') {
+                valA = (a.journal || '').toLowerCase();
+                valB = (b.journal || '').toLowerCase();
+            } else if (pubSortField === 'year') {
+                valA = parseInt(a.year) || 0;
+                valB = parseInt(b.year) || 0;
+            } else if (pubSortField === 'citations') {
+                valA = parseInt(a.citations) || 0;
+                valB = parseInt(b.citations) || 0;
+            }
+            if (valA < valB) return pubSortDir === 'asc' ? -1 : 1;
+            if (valA > valB) return pubSortDir === 'asc' ? 1 : -1;
+            return 0;
+        });
+    }
+
     // --- RENDER RESEARCHERS ---
     function renderResearchers() {
         const query = searchResearcher.value.toLowerCase();
-        const filtered = researchers.filter(r => 
+        let filtered = researchers.filter(r => 
             r.name.toLowerCase().includes(query) ||
             r.author_id.includes(query) ||
             r.department.toLowerCase().includes(query)
         );
+
+        // Render Summary Table
+        renderResearcherSummary(filtered);
+
+        // Sort List
+        filtered = sortResearchers(filtered);
 
         researcherTbody.innerHTML = '';
         if (filtered.length === 0) {
@@ -114,11 +275,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         filtered.forEach((r, idx) => {
-            // Find original index in master array
             const originalIndex = researchers.indexOf(r);
             const tr = document.createElement('tr');
             
-            const badgeClass = r.status === 'Active' ? 'badge-citation' : 'badge-citation';
             const badgeStyle = r.status === 'Active' 
                 ? 'background: rgba(13, 148, 136, 0.15); color: var(--accent-teal); border: 1px solid rgba(13, 148, 136, 0.25);' 
                 : 'background: rgba(148, 163, 184, 0.15); color: var(--text-muted); border: 1px solid rgba(148, 163, 184, 0.25);';
@@ -162,11 +321,34 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- RENDER PUBLICATIONS ---
     function renderPublications() {
         const query = searchPublication.value.toLowerCase();
-        const filtered = publications.filter(pub => 
-            pub.title.toLowerCase().includes(query) ||
-            pub.journal.toLowerCase().includes(query) ||
-            pub.authors.some(a => a.toLowerCase().includes(query))
-        );
+        const yearVal = adminYearFilter ? adminYearFilter.value : 'all';
+        const currentYear = new Date().getFullYear();
+
+        let filtered = publications.filter(pub => {
+            // Text search match
+            const matchText = pub.title.toLowerCase().includes(query) ||
+                pub.journal.toLowerCase().includes(query) ||
+                pub.authors.some(a => a.toLowerCase().includes(query));
+
+            if (!matchText) return false;
+
+            // Year range filters match
+            const pubYear = parseInt(pub.year);
+            if (isNaN(pubYear)) return yearVal === 'all';
+
+            if (yearVal === 'all') return true;
+            if (yearVal === '3y') return pubYear >= (currentYear - 2);
+            if (yearVal === '5y') return pubYear >= (currentYear - 4);
+            if (yearVal === '10y') return pubYear >= (currentYear - 9);
+
+            return pubYear === parseInt(yearVal);
+        });
+
+        // Render Summary Table
+        renderPublicationSummary(filtered);
+
+        // Sort List
+        filtered = sortPublications(filtered);
 
         publicationTbody.innerHTML = '';
         if (filtered.length === 0) {
@@ -359,9 +541,86 @@ document.addEventListener('DOMContentLoaded', () => {
         renderPublications();
     });
 
-    // --- SEARCH LISTENERS ---
+    // Helper to get active filtered and sorted lists
+    function getFilteredPublications() {
+        const query = searchPublication.value.toLowerCase();
+        const yearVal = adminYearFilter ? adminYearFilter.value : 'all';
+        const currentYear = new Date().getFullYear();
+
+        let filtered = publications.filter(pub => {
+            const matchText = pub.title.toLowerCase().includes(query) ||
+                pub.journal.toLowerCase().includes(query) ||
+                pub.authors.some(a => a.toLowerCase().includes(query));
+
+            if (!matchText) return false;
+
+            const pubYear = parseInt(pub.year);
+            if (isNaN(pubYear)) return yearVal === 'all';
+
+            if (yearVal === 'all') return true;
+            if (yearVal === '3y') return pubYear >= (currentYear - 2);
+            if (yearVal === '5y') return pubYear >= (currentYear - 4);
+            if (yearVal === '10y') return pubYear >= (currentYear - 9);
+
+            return pubYear === parseInt(yearVal);
+        });
+        return sortPublications(filtered);
+    }
+
+    function getFilteredResearchers() {
+        const query = searchResearcher.value.toLowerCase();
+        let filtered = researchers.filter(r => 
+            r.name.toLowerCase().includes(query) ||
+            r.author_id.includes(query) ||
+            r.department.toLowerCase().includes(query)
+        );
+        return sortResearchers(filtered);
+    }
+
+    // --- SEARCH & FILTER LISTENERS ---
     searchResearcher.addEventListener('input', renderResearchers);
     searchPublication.addEventListener('input', renderPublications);
+    if (adminYearFilter) {
+        adminYearFilter.addEventListener('change', renderPublications);
+    }
+
+    // --- SORT CLICK EVENT LISTENERS ---
+    document.querySelectorAll('.sortable-header').forEach(header => {
+        header.addEventListener('click', () => {
+            const section = header.getAttribute('data-sec');
+            const field = header.getAttribute('data-sort');
+            
+            if (section === 'publication') {
+                if (pubSortField === field) {
+                    pubSortDir = pubSortDir === 'asc' ? 'desc' : 'asc';
+                } else {
+                    pubSortField = field;
+                    pubSortDir = 'asc';
+                }
+                // Update sorting icons
+                document.querySelectorAll('[data-sec="publication"] i').forEach(icon => {
+                    icon.className = "fa-solid fa-sort";
+                });
+                const icon = header.querySelector('i');
+                icon.className = pubSortDir === 'asc' ? "fa-solid fa-sort-up" : "fa-solid fa-sort-down";
+                renderPublications();
+            } else if (section === 'researcher') {
+                if (resSortField === field) {
+                    resSortDir = resSortDir === 'asc' ? 'desc' : 'asc';
+                } else {
+                    resSortField = field;
+                    resSortDir = 'asc';
+                }
+                // Update sorting icons
+                document.querySelectorAll('[data-sec="researcher"] i').forEach(icon => {
+                    icon.className = "fa-solid fa-sort";
+                });
+                const icon = header.querySelector('i');
+                icon.className = resSortDir === 'asc' ? "fa-solid fa-sort-up" : "fa-solid fa-sort-down";
+                renderResearchers();
+            }
+        });
+    });
 
     // --- GLOBAL SAVE API CALLS ---
     btnGlobalSave.addEventListener('click', async () => {
@@ -402,14 +661,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnExportWord = document.getElementById('btn-export-word');
     const btnExportPdf = document.getElementById('btn-export-pdf');
 
-    // CSV Exporter
+    // CSV Exporter (uses filtered list)
     if (btnExportCsv) {
         btnExportCsv.addEventListener('click', () => {
             const csvContent = [];
             // Headers
             csvContent.push(["Title", "Authors", "Corresponding Author", "Journal", "Year", "Citations", "DOI", "Databases", "Departments"].map(h => `"${h.replace(/"/g, '""')}"`).join(","));
-            // Rows
-            publications.forEach(pub => {
+            
+            // Rows from filtered lists
+            const activePublications = getFilteredPublications();
+            activePublications.forEach(pub => {
                 csvContent.push([
                     pub.title || "",
                     pub.authors ? pub.authors.join("; ") : "",
@@ -435,10 +696,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Word Exporter (HTML .doc trick)
+    // Word Exporter (uses filtered list)
     if (btnExportWord) {
         btnExportWord.addEventListener('click', () => {
             const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            const activePublications = getFilteredPublications();
+            
             let html = `
             <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
             <head>
@@ -467,7 +730,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="meta">
                     <strong>Faculty of Medicine, Naresuan University</strong><br/>
                     Generated on: ${dateStr}<br/>
-                    Total Publications: ${publications.length}
+                    Total Filtered Publications: ${activePublications.length}
                 </div>
                 <table>
                     <thead>
@@ -482,7 +745,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <tbody>
             `;
             
-            publications.forEach((pub, idx) => {
+            activePublications.forEach((pub, idx) => {
                 html += `
                         <tr>
                             <td>${idx + 1}</td>

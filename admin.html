@@ -186,14 +186,17 @@
                             </button>
                         </div>
 
+                        <!-- Summary Table for Researchers -->
+                        <div id="researcher-summary-container" style="margin-bottom: 1.5rem;"></div>
+
                         <div class="table-container">
                             <table class="data-table">
                                 <thead>
                                     <tr>
-                                        <th style="width: 25%;">Researcher Name</th>
-                                        <th style="width: 20%;">Scopus Author ID</th>
-                                        <th style="width: 30%;">Department</th>
-                                        <th style="width: 10%;">Status</th>
+                                        <th style="width: 25%; cursor: pointer;" class="sortable-header" data-sort="name" data-sec="researcher">Researcher Name <i class="fa-solid fa-sort"></i></th>
+                                        <th style="width: 20%; cursor: pointer;" class="sortable-header" data-sort="author_id" data-sec="researcher">Scopus Author ID <i class="fa-solid fa-sort"></i></th>
+                                        <th style="width: 30%; cursor: pointer;" class="sortable-header" data-sort="department" data-sec="researcher">Department <i class="fa-solid fa-sort"></i></th>
+                                        <th style="width: 10%; cursor: pointer;" class="sortable-header" data-sort="status" data-sec="researcher">Status <i class="fa-solid fa-sort"></i></th>
                                         <th style="width: 15%; text-align: center;">Actions</th>
                                     </tr>
                                 </thead>
@@ -209,10 +212,19 @@
                 <section id="manage-publications-section" class="dashboard-section">
                     <div class="section-card">
                         <div class="admin-controls">
-                            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
                                 <div class="search-box">
                                     <i class="fa-solid fa-magnifying-glass"></i>
                                     <input type="text" id="publication-admin-search" placeholder="Search Articles...">
+                                </div>
+                                <div class="filter-group" style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <label for="admin-year-filter" style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);"><i class="fa-regular fa-calendar"></i> Period:</label>
+                                    <select id="admin-year-filter" style="padding: 0.5rem 0.8rem; border-radius: 8px; border: 1px solid var(--border-color); background: #f8fafc; font-size: 0.85rem; outline: none; font-family: var(--font-body); font-weight: 500;">
+                                        <option value="all">All Years</option>
+                                        <option value="3y">Past 3 Years</option>
+                                        <option value="5y">Past 5 Years</option>
+                                        <option value="10y">Past 10 Years</option>
+                                    </select>
                                 </div>
                             </div>
                             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
@@ -231,14 +243,17 @@
                             </div>
                         </div>
 
+                        <!-- Summary Table for Publications -->
+                        <div id="publication-summary-container" style="margin-bottom: 1.5rem;"></div>
+
                         <div class="table-container">
                             <table class="data-table">
                                 <thead>
                                     <tr>
-                                        <th style="width: 45%;">Article Details</th>
-                                        <th style="width: 20%;">Journal</th>
-                                        <th style="width: 10%; text-align: center;">Year</th>
-                                        <th style="width: 10%; text-align: center;">Citations</th>
+                                        <th style="width: 45%; cursor: pointer;" class="sortable-header" data-sort="title" data-sec="publication">Article Details <i class="fa-solid fa-sort"></i></th>
+                                        <th style="width: 20%; cursor: pointer;" class="sortable-header" data-sort="journal" data-sec="publication">Journal <i class="fa-solid fa-sort"></i></th>
+                                        <th style="width: 10%; text-align: center; cursor: pointer;" class="sortable-header" data-sort="year" data-sec="publication">Year <i class="fa-solid fa-sort"></i></th>
+                                        <th style="width: 10%; text-align: center; cursor: pointer;" class="sortable-header" data-sort="citations" data-sec="publication">Citations <i class="fa-solid fa-sort"></i></th>
                                         <th style="width: 15%; text-align: center;">Actions</th>
                                     </tr>
                                 </thead>

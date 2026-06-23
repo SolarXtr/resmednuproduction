@@ -1006,3 +1006,37 @@ body {
         color: #0f172a !important;
     }
 }
+
+/* Summary Table and Sort Styles */
+.summary-table {
+    width: 100%;
+    margin-bottom: 1.5rem;
+    border-collapse: collapse;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(10px);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+.summary-table th, .summary-table td {
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+.summary-table th {
+    background: rgba(241, 245, 249, 0.6);
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+.summary-table tr:last-child td {
+    border-bottom: none;
+}
+.sortable-header:hover {
+    background: rgba(0, 0, 0, 0.03) !important;
+}
+.sortable-header i {
+    margin-left: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
