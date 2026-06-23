@@ -620,6 +620,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     <i class="fa-solid fa-link"></i> DOI: ${pub.doi}
                 </a>` : '';
 
+            // Generate database source badges
+            const dbList = pub.databases || ["Scopus"];
+            const dbBadgesHtml = dbList.map(db => {
+                const cleanDb = db.trim();
+                const icon = cleanDb.toLowerCase() === "scopus" ? "fa-solid fa-graduation-cap" : "fa-solid fa-notes-medical";
+                const badgeClass = cleanDb.toLowerCase() === "scopus" ? "db-badge-scopus" : "db-badge-pubmed";
+                return `<span class="db-badge ${badgeClass}"><i class="${icon}" style="font-size: 0.65rem;"></i> ${cleanDb}</span>`;
+            }).join('');
+
             // Compute Faculty of Medicine researchers with superscript numbers
             const registeredNames = new Set(database.researchers.map(r => r.name.trim().toLowerCase()));
             const nuResearchers = [];
@@ -645,8 +654,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="article-authors" style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">
                             ${formattedAuthors}
                         </div>
-                        <div>
+                        <div style="display: flex; align-items: center; flex-wrap: wrap;">
                             ${doiSection}
+                            <div class="db-badges">
+                                ${dbBadgesHtml}
+                            </div>
                         </div>
                     </div>
                 </td>
