@@ -77,6 +77,13 @@
                 
                 <div class="header-controls">
                     <div class="filter-group">
+                        <label for="quartile-source-select"><i class="fa-solid fa-chart-column"></i> Quartile Base:</label>
+                        <select id="quartile-source-select" style="padding: 0.4rem 0.6rem; border-radius: 6px; border: 1px solid var(--border-color); background: #f8fafc; font-size: 0.85rem; font-family: var(--font-body); font-weight: 500; outline: none; cursor: pointer;">
+                            <option value="scimago">SCImago SJR</option>
+                            <option value="scopus">Scopus CiteScore</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
                         <label for="year-filter"><i class="fa-regular fa-calendar"></i> Year:</label>
                         <select id="year-filter">
                             <option value="all">All Years</option>
@@ -147,6 +154,19 @@
                                 0 publications
                             </div>
                         </div>
+
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <span class="kpi-title">Q1/Q2 Quality Rate</span>
+                                <div class="kpi-icon icon-blue" style="background: rgba(13, 148, 136, 0.1); color: var(--accent-teal);">
+                                    <i class="fa-solid fa-award"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-value" id="kpi-q-rate">0%</div>
+                            <div class="kpi-footer" id="kpi-q-count">
+                                0 of 0 articles
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Charts Grid -->
@@ -174,6 +194,14 @@
                                 <canvas id="departmentsChart"></canvas>
                             </div>
                         </div>
+
+                        <!-- Chart 4: Journal Quartile breakdown -->
+                        <div class="chart-card">
+                            <h3><i class="fa-solid fa-chart-pie"></i> Journal Quartile Distribution</h3>
+                            <div class="chart-container">
+                                <canvas id="quartileChart"></canvas>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -192,11 +220,12 @@
                             <table class="data-table" id="publications-table">
                                 <thead>
                                     <tr>
-                                        <th style="width: 45%; cursor: pointer;" id="th-title">Article <i class="fa-solid fa-sort" style="font-size: 0.8rem; margin-left: 0.25rem; opacity: 0.6;"></i></th>
-                                        <th style="width: 22%; cursor: pointer;" id="th-author">Researcher <i class="fa-solid fa-sort" style="font-size: 0.8rem; margin-left: 0.25rem; opacity: 0.6;"></i></th>
-                                        <th style="width: 18%; cursor: pointer;" id="th-journal">Journal <i class="fa-solid fa-sort" style="font-size: 0.8rem; margin-left: 0.25rem; opacity: 0.6;"></i></th>
+                                        <th style="width: 40%; cursor: pointer;" id="th-title">Article <i class="fa-solid fa-sort" style="font-size: 0.8rem; margin-left: 0.25rem; opacity: 0.6;"></i></th>
+                                        <th style="width: 20%; cursor: pointer;" id="th-author">Researcher <i class="fa-solid fa-sort" style="font-size: 0.8rem; margin-left: 0.25rem; opacity: 0.6;"></i></th>
+                                        <th style="width: 15%; cursor: pointer;" id="th-journal">Journal <i class="fa-solid fa-sort" style="font-size: 0.8rem; margin-left: 0.25rem; opacity: 0.6;"></i></th>
                                         <th style="width: 8%; text-align: center; cursor: pointer;" id="th-year">Year <i class="fa-solid fa-sort-down" style="font-size: 0.8rem; margin-left: 0.25rem;"></i></th>
                                         <th style="width: 7%; text-align: center; cursor: pointer;" id="th-citations">Citations <i class="fa-solid fa-sort" style="font-size: 0.8rem; margin-left: 0.25rem; opacity: 0.6;"></i></th>
+                                        <th style="width: 10%; text-align: center; cursor: pointer;" id="th-quartile">Quartile <i class="fa-solid fa-sort" style="font-size: 0.8rem; margin-left: 0.25rem; opacity: 0.6;"></i></th>
                                     </tr>
                                 </thead>
                                 <tbody id="publications-tbody">

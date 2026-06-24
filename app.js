@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let trendChart = null;
     let authorsChart = null;
     let departmentsChart = null;
+    let quartileChart = null;
 
     // DOM Elements
     const navOverview = document.getElementById('nav-overview');
@@ -30,6 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnRefresh = document.getElementById('btn-refresh-data');
     const retrievedTimeEl = document.getElementById('retrieved-at');
     const dataSourceBadge = document.getElementById('data-source-badge');
+
+    const quartileSourceSelect = document.getElementById('quartile-source-select');
+    let activeQuartileSource = 'scimago';
 
     // KPI Elements
     const kpiTotalDocs = document.getElementById('kpi-total-docs');
@@ -178,6 +182,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Filter Listeners
+    if (quartileSourceSelect) {
+        quartileSourceSelect.addEventListener('change', () => {
+            currentPage = 1;
+            applyFilter();
+        });
+    }
+
     yearFilter.addEventListener('change', () => {
         currentPage = 1;
         applyFilter();
@@ -253,6 +264,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         kpiTopAuthor.textContent = topAuthor;
         kpiTopAuthorCount.textContent = `${topCount} publication${topCount != 1 ? 's' : ''}`;
+
+        // Quartile distribution calculations
+        let q12Count = 0;
+        data.forEach(pub => {
+            const qVal = activeQuartileSource === 'scopus' ? pub.quartile_scopus : pub.quartile_scimago;
+            if (qVal === 'Q1' || qVal === 'Q2') {
+                q12Count++;
+            }
+        });
+        const qRate = totalDocs > 0 ? ((q12Count / totalDocs) * 100).toFixed(0) : 0;
+        const kpiQRate = document.getElementById('kpi-q-rate');
+        const kpiQCount = document.getElementById('kpi-q-count');
+        if (kpiQRate) kpiQRate.textContent = `${qRate}%`;
+        if (kpiQCount) kpiQCount.textContent = `${q12Count} of ${totalDocs} articles`;
     }
 
     // --- CHART GENERATION ---
@@ -261,6 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (trendChart) trendChart.destroy();
         if (authorsChart) authorsChart.destroy();
         if (departmentsChart) departmentsChart.destroy();
+        if (quartileChart) quartileChart.destroy();
 
         // 1. Compile publications & citations by year
         const yearStats = {};
@@ -472,6 +498,44 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
+
+        // Quartile Doughnut Chart Generation
+        const qCounts = { Q1: 0, Q2: 0, Q3: 0, Q4: 0 };
+        data.forEach(pub => {
+            const qVal = activeQuartileSource === 'scopus' ? pub.quartile_scopus : pub.quartile_scimago;
+            if (qVal && qCounts[qVal] !== undefined) {
+                qCounts[qVal]++;
+            }
+        });
+
+        const ctxQuartile = document.getElementById('quartileChart').getContext('2d');
+        quartileChart = new Chart(ctxQuartile, {
+            type: 'doughnut',
+            data: {
+                labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+                datasets: [{
+                    data: [qCounts.Q1, qCounts.Q2, qCounts.Q3, qCounts.Q4],
+                    backgroundColor: [
+                        '#0d9488', // Q1
+                        '#2563eb', // Q2
+                        '#d97706', // Q3
+                        '#ef4444'  // Q4
+                    ],
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#475569', boxWidth: 12, padding: 10 }
+                    }
+                }
+            }
+        });
     }
 
     // --- PUBLICATIONS TABLE RENDERING & PAGINATION ---
@@ -506,6 +570,9 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (sortField === 'citations') {
                 valA = a.citations;
                 valB = b.citations;
+            } else if (sortField === 'quartile') {
+                valA = (activeQuartileSource === 'scopus' ? a.quartile_scopus : a.quartile_scimago) || 'Q9';
+                valB = (activeQuartileSource === 'scopus' ? b.quartile_scopus : b.quartile_scimago) || 'Q9';
             }
             
             if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
@@ -680,6 +747,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 ? nuResearchers.join(', ') 
                 : `<span style="color: var(--text-muted); font-style: italic;">-</span>`;
 
+            const qVal = activeQuartileSource === 'scopus' ? pub.quartile_scopus : pub.quartile_scimago;
+            const qScopus = pub.quartile_scopus || 'N/A';
+            const qScimago = pub.quartile_scimago || 'N/A';
+            
+            let qBadgeColor = 'var(--text-muted)';
+            let qBgColor = 'rgba(148, 163, 184, 0.1)';
+            let qBorderColor = 'rgba(148, 163, 184, 0.2)';
+            
+            if (qVal === 'Q1') {
+                qBadgeColor = '#0d9488';
+                qBgColor = 'rgba(13, 148, 136, 0.1)';
+                qBorderColor = 'rgba(13, 148, 136, 0.2)';
+            } else if (qVal === 'Q2') {
+                qBadgeColor = '#2563eb';
+                qBgColor = 'rgba(37, 99, 235, 0.1)';
+                qBorderColor = 'rgba(37, 99, 235, 0.2)';
+            } else if (qVal === 'Q3') {
+                qBadgeColor = '#d97706';
+                qBgColor = 'rgba(217, 119, 6, 0.1)';
+                qBorderColor = 'rgba(217, 119, 6, 0.2)';
+            } else if (qVal === 'Q4') {
+                qBadgeColor = '#ef4444';
+                qBgColor = 'rgba(239, 68, 68, 0.1)';
+                qBorderColor = 'rgba(239, 68, 68, 0.2)';
+            }
+            
+            const qDisplay = qVal || '-';
+            const tooltipText = `Scopus: ${qScopus} | SCImago: ${qScimago}`;
+
             tr.innerHTML = `
                 <td>
                     <div style="display: flex; flex-direction: column; gap: 0.4rem;">
@@ -711,6 +807,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td style="text-align: center;">
                     <span class="badge badge-citation" style="background: rgba(139, 92, 246, 0.15); color: var(--accent-purple); padding: 0.35rem 0.6rem; border-radius: 6px; font-weight: bold; border: 1px solid rgba(139, 92, 246, 0.25);">
                         ${pub.citations}
+                    </span>
+                </td>
+                <td style="text-align: center;">
+                    <span class="badge badge-quartile" style="background: ${qBgColor}; color: ${qBadgeColor}; padding: 0.35rem 0.6rem; border-radius: 6px; font-weight: bold; border: 1px solid ${qBorderColor}; cursor: help;" title="${tooltipText}">
+                        ${qDisplay}
                     </span>
                 </td>
             `;
@@ -925,7 +1026,8 @@ document.addEventListener('DOMContentLoaded', () => {
             'author': document.getElementById('th-author'),
             'journal': document.getElementById('th-journal'),
             'year': document.getElementById('th-year'),
-            'citations': document.getElementById('th-citations')
+            'citations': document.getElementById('th-citations'),
+            'quartile': document.getElementById('th-quartile')
         };
         
         for (const [field, el] of Object.entries(headers)) {
@@ -960,12 +1062,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const thJournal = document.getElementById('th-journal');
     const thYear = document.getElementById('th-year');
     const thCitations = document.getElementById('th-citations');
+    const thQuartile = document.getElementById('th-quartile');
 
     if (thTitle) thTitle.addEventListener('click', () => handleHeaderClick('title'));
     if (thAuthor) thAuthor.addEventListener('click', () => handleHeaderClick('author'));
     if (thJournal) thJournal.addEventListener('click', () => handleHeaderClick('journal'));
     if (thYear) thYear.addEventListener('click', () => handleHeaderClick('year'));
     if (thCitations) thCitations.addEventListener('click', () => handleHeaderClick('citations'));
+    if (thQuartile) thQuartile.addEventListener('click', () => handleHeaderClick('quartile'));
 
     // --- INITIAL BOOTSTRAP ---
     loadData();

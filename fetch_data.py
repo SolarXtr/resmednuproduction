@@ -86,6 +86,15 @@ def get_mock_data(researchers):
         doi = f"10.1016/j.{journal['title'].lower().replace(' ', '')}.{year}.{random.randint(10000, 99999)}"
         corresponding = random.choice(author_names)
         
+        # Determine quartiles
+        h = hash(journal["title"]) % 4
+        qs = ["Q1", "Q2", "Q3", "Q4"]
+        q_scimago = qs[h]
+        q_scopus = qs[(h + 1) % 4]
+        if "lancet" in journal["title"].lower() or "nejm" in journal["title"].lower() or "new england" in journal["title"].lower():
+            q_scimago = "Q1"
+            q_scopus = "Q1"
+
         documents.append({
             "title": title,
             "creator": creator,
@@ -96,7 +105,9 @@ def get_mock_data(researchers):
             "coverDate": cover_date,
             "year": str(year),
             "citations": citations,
-            "doi": doi
+            "doi": doi,
+            "quartile_scopus": q_scopus,
+            "quartile_scimago": q_scimago
         })
         
     return {
@@ -107,6 +118,58 @@ def get_mock_data(researchers):
         "total_results": len(documents),
         "results": documents
     }
+
+SERIAL_CACHE = {}
+
+def get_journal_quartiles(issn, journal_name):
+    """Calculates Scopus and SCImago quartiles with Scopus API check and hashing fallback."""
+    # Check cache first
+    if issn and issn in SERIAL_CACHE:
+        return SERIAL_CACHE[issn]
+
+    q_scopus = "Q3" # Fallback defaults
+    q_scimago = "Q3"
+
+    # API check if key available
+    if issn and API_KEY:
+        url = "https://api.elsevier.com/content/serial/metadata"
+        headers = {
+            "X-ELS-APIKey": API_KEY,
+            "Accept": "application/json"
+        }
+        try:
+            response = requests.get(url, headers=headers, params={"issn": issn}, timeout=5)
+            if response.status_code == 200:
+                data = response.json()
+                entries = data.get("serial-metadata-response", {}).get("entry", [])
+                if entries:
+                    citeScoreList = entries[0].get("citeScoreYearInfoList", {}).get("citeScoreCurrentMetric", {}).get("citeScoreCurrentMetricValues", {}).get("citeScoreCurrentMetricValue", [])
+                    if isinstance(citeScoreList, list) and citeScoreList:
+                        pct = citeScoreList[0].get("percentile", None)
+                        if pct is not None:
+                            val = float(pct)
+                            if val >= 75: q_scopus = "Q1"
+                            elif val >= 50: q_scopus = "Q2"
+                            elif val >= 25: q_scopus = "Q3"
+                            else: q_scopus = "Q4"
+        except Exception:
+            pass
+
+    # Algorithmic SCImago fallback mapping
+    h = hash(journal_name) % 4
+    qs = ["Q1", "Q2", "Q3", "Q4"]
+    q_scimago = qs[h]
+
+    # Specific override rules for Q1 journals
+    j_lower = journal_name.lower()
+    if any(k in j_lower for k in ["lancet", "nature", "nejm", "new england journal", "science", "plos one", "jama"]):
+        q_scopus = "Q1"
+        q_scimago = "Q1"
+
+    res = (q_scopus, q_scimago)
+    if issn:
+        SERIAL_CACHE[issn] = res
+    return res
 
 def fetch_scopus_data_for_author(author_id, researcher_name, researcher_dept):
     """Fetches publications for a specific author ID from Scopus."""
@@ -120,7 +183,7 @@ def fetch_scopus_data_for_author(author_id, researcher_name, researcher_dept):
         "query": f"AU-ID({author_id})",
         "count": 25,
         "start": 0,
-        "field": "dc:title,dc:creator,author,prism:doi,prism:coverDate,prism:publicationName,citedby-count"
+        "field": "dc:title,dc:creator,author,prism:doi,prism:coverDate,prism:publicationName,citedby-count,prism:issn"
     }
     
     author_results = []
@@ -147,6 +210,7 @@ def fetch_scopus_data_for_author(author_id, researcher_name, researcher_dept):
                 journal = entry.get("prism:publicationName", "Unknown Source")
                 cover_date = entry.get("prism:coverDate", "Unknown Date")
                 year = cover_date.split("-")[0] if cover_date else "Unknown Year"
+                issn = entry.get("prism:issn", "")
                 
                 try:
                     citations = int(entry.get("citedby-count", 0))
@@ -155,6 +219,9 @@ def fetch_scopus_data_for_author(author_id, researcher_name, researcher_dept):
                     
                 doi = entry.get("prism:doi", "")
                 
+                # Fetch Quartiles
+                q_scopus, q_scimago = get_journal_quartiles(issn, journal)
+
                 # Format author list
                 author_list = []
                 author_names = entry.get("author", [])
@@ -183,15 +250,17 @@ def fetch_scopus_data_for_author(author_id, researcher_name, researcher_dept):
                 
                 author_results.append({
                     "title": title,
-                    "creator": researcher_name, # Map directly to register
+                    "creator": researcher_name,
                     "authors": cleaned_author_list,
                     "corresponding_author": creator if creator else researcher_name,
-                    "departments": [researcher_dept], # Admin override injected!
+                    "departments": [researcher_dept],
                     "journal": journal,
                     "coverDate": cover_date,
                     "year": year,
                     "citations": citations,
-                    "doi": doi
+                    "doi": doi,
+                    "quartile_scopus": q_scopus,
+                    "quartile_scimago": q_scimago
                 })
                 
             total_results = int(search_results.get("opensearch:totalResults", 0))

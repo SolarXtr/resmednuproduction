@@ -261,6 +261,9 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (pubSortField === 'citations') {
                 valA = parseInt(a.citations) || 0;
                 valB = parseInt(b.citations) || 0;
+            } else if (pubSortField === 'quartile') {
+                valA = a.quartile_scopus || 'Q9';
+                valB = b.quartile_scopus || 'Q9';
             }
             if (valA < valB) return pubSortDir === 'asc' ? -1 : 1;
             if (valA > valB) return pubSortDir === 'asc' ? 1 : -1;
@@ -470,6 +473,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     </span>
                 </td>
                 <td style="text-align: center;">
+                    <div style="display: flex; flex-direction: column; gap: 0.2rem; align-items: center;">
+                        <span class="badge" style="background: rgba(13, 148, 136, 0.1); color: var(--accent-teal); font-size: 0.75rem; padding: 0.15rem 0.35rem; border-radius: 4px; font-weight: bold; border: 1px solid rgba(13, 148, 136, 0.15);">
+                            Scopus: ${pub.quartile_scopus || '-'}
+                        </span>
+                        <span class="badge" style="background: rgba(37, 99, 235, 0.1); color: var(--accent-blue); font-size: 0.75rem; padding: 0.15rem 0.35rem; border-radius: 4px; font-weight: bold; border: 1px solid rgba(37, 99, 235, 0.15);">
+                            SJR: ${pub.quartile_scimago || '-'}
+                        </span>
+                    </div>
+                </td>
+                <td style="text-align: center; white-space: nowrap;">
                     <button class="admin-action-btn btn-edit" data-idx="${originalIndex}"><i class="fa-solid fa-pen"></i> Edit</button>
                     <button class="admin-action-btn btn-delete" data-idx="${originalIndex}"><i class="fa-solid fa-trash"></i> Delete</button>
                 </td>
@@ -553,7 +566,9 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('pub-year-input').value = pub.year;
             document.getElementById('pub-citations-input').value = pub.citations;
             document.getElementById('pub-doi-input').value = pub.doi || "";
-
+            document.getElementById('pub-q-scopus').value = pub.quartile_scopus || "";
+            document.getElementById('pub-q-scimago').value = pub.quartile_scimago || "";
+ 
             const dbList = pub.databases || ["Scopus"];
             document.getElementById('db-scopus').checked = dbList.includes("Scopus");
             document.getElementById('db-pubmed').checked = dbList.includes("PubMed");
@@ -561,6 +576,8 @@ document.addEventListener('DOMContentLoaded', () => {
             publicationModalTitle.textContent = "Add New Article";
             publicationForm.reset();
             document.getElementById('publication-idx').value = "";
+            document.getElementById('pub-q-scopus').value = "";
+            document.getElementById('pub-q-scimago').value = "";
             document.getElementById('db-scopus').checked = true;
             document.getElementById('db-pubmed').checked = false;
         }
@@ -596,7 +613,9 @@ document.addEventListener('DOMContentLoaded', () => {
             year: document.getElementById('pub-year-input').value.toString(),
             citations: parseInt(document.getElementById('pub-citations-input').value) || 0,
             doi: document.getElementById('pub-doi-input').value.trim() || null,
-            databases: databases
+            databases: databases,
+            quartile_scopus: document.getElementById('pub-q-scopus').value || null,
+            quartile_scimago: document.getElementById('pub-q-scimago').value || null
         };
 
         // Inject department auto-matching for the added authors
@@ -761,7 +780,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnExportCsv.addEventListener('click', () => {
             const csvContent = [];
             // Headers
-            csvContent.push(["Title", "Authors", "Corresponding Author", "Journal", "Year", "Citations", "DOI", "Databases", "Departments"].map(h => `"${h.replace(/"/g, '""')}"`).join(","));
+            csvContent.push(["Title", "Authors", "Corresponding Author", "Journal", "Year", "Citations", "Quartile Scopus", "Quartile SCImago", "DOI", "Databases", "Departments"].map(h => `"${h.replace(/"/g, '""')}"`).join(","));
             
             // Rows from filtered lists
             const activePublications = getFilteredPublications();
@@ -773,6 +792,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     pub.journal || "",
                     pub.year || "",
                     pub.citations || "0",
+                    pub.quartile_scopus || "",
+                    pub.quartile_scimago || "",
                     pub.doi || "",
                     pub.databases ? pub.databases.join("; ") : "Scopus",
                     pub.departments ? pub.departments.join("; ") : ""
@@ -831,10 +852,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     <thead>
                         <tr>
                             <th style="width: 5%">No.</th>
-                            <th style="width: 45%">Title & Authors</th>
-                            <th style="width: 30%">Journal</th>
+                            <th style="width: 40%">Title & Authors</th>
+                            <th style="width: 25%">Journal</th>
                             <th style="width: 10%">Year</th>
                             <th style="width: 10%">Citations</th>
+                            <th style="width: 10%">Quartiles (Scopus/SJR)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -851,6 +873,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <td>${pub.journal}</td>
                             <td style="text-align: center;">${pub.year}</td>
                             <td style="text-align: center;">${pub.citations}</td>
+                            <td style="text-align: center; font-size: 8.5pt;">${pub.quartile_scopus || '-'}/${pub.quartile_scimago || '-'}</td>
                         </tr>
                 `;
             });

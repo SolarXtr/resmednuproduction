@@ -275,10 +275,11 @@
                             <table class="data-table">
                                 <thead>
                                     <tr>
-                                        <th style="width: 45%; cursor: pointer;" class="sortable-header" data-sort="title" data-sec="publication">Article Details <i class="fa-solid fa-sort"></i></th>
-                                        <th style="width: 20%; cursor: pointer;" class="sortable-header" data-sort="journal" data-sec="publication">Journal <i class="fa-solid fa-sort"></i></th>
-                                        <th style="width: 10%; text-align: center; cursor: pointer;" class="sortable-header" data-sort="year" data-sec="publication">Year <i class="fa-solid fa-sort"></i></th>
-                                        <th style="width: 10%; text-align: center; cursor: pointer;" class="sortable-header" data-sort="citations" data-sec="publication">Citations <i class="fa-solid fa-sort"></i></th>
+                                        <th style="width: 35%; cursor: pointer;" class="sortable-header" data-sort="title" data-sec="publication">Article Details <i class="fa-solid fa-sort"></i></th>
+                                        <th style="width: 18%; cursor: pointer;" class="sortable-header" data-sort="journal" data-sec="publication">Journal <i class="fa-solid fa-sort"></i></th>
+                                        <th style="width: 8%; text-align: center; cursor: pointer;" class="sortable-header" data-sort="year" data-sec="publication">Year <i class="fa-solid fa-sort"></i></th>
+                                        <th style="width: 8%; text-align: center; cursor: pointer;" class="sortable-header" data-sort="citations" data-sec="publication">Citations <i class="fa-solid fa-sort"></i></th>
+                                        <th style="width: 16%; text-align: center; cursor: pointer;" class="sortable-header" data-sort="quartile" data-sec="publication">Quartiles (Scopus | SJR) <i class="fa-solid fa-sort"></i></th>
                                         <th style="width: 15%; text-align: center;">Actions</th>
                                     </tr>
                                 </thead>
@@ -364,6 +365,28 @@
                 <div class="admin-form-group">
                     <label for="pub-doi-input">DOI</label>
                     <input type="text" id="pub-doi-input" placeholder="e.g. 10.3390/jcm15113990">
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <div class="admin-form-group" style="flex: 1;">
+                        <label for="pub-q-scopus">Scopus Quartile</label>
+                        <select id="pub-q-scopus">
+                            <option value="">- None -</option>
+                            <option value="Q1">Q1</option>
+                            <option value="Q2">Q2</option>
+                            <option value="Q3">Q3</option>
+                            <option value="Q4">Q4</option>
+                        </select>
+                    </div>
+                    <div class="admin-form-group" style="flex: 1;">
+                        <label for="pub-q-scimago">SCImago Quartile</label>
+                        <select id="pub-q-scimago">
+                            <option value="">- None -</option>
+                            <option value="Q1">Q1</option>
+                            <option value="Q2">Q2</option>
+                            <option value="Q3">Q3</option>
+                            <option value="Q4">Q4</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="admin-form-group">
                     <label>Database Source</label>
