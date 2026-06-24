@@ -146,6 +146,10 @@
                     <i class="fa-solid fa-book-bookmark"></i>
                     <span>Manage Articles</span>
                 </a>
+                <a href="report.html" class="nav-item">
+                    <i class="fa-solid fa-file-invoice"></i>
+                    <span>Reports Matrix</span>
+                </a>
                 <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1rem 0;">
                 <a href="index.html" class="nav-item">
                     <i class="fa-solid fa-arrow-left"></i>
@@ -365,6 +369,28 @@
                 <div class="admin-form-group">
                     <label for="pub-doi-input">DOI</label>
                     <input type="text" id="pub-doi-input" placeholder="e.g. 10.3390/jcm15113990">
+                </div>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                    <div class="admin-form-group" style="flex: 1; min-width: 80px;">
+                        <label for="pub-volume-input">Volume</label>
+                        <input type="text" id="pub-volume-input" placeholder="e.g. 175">
+                    </div>
+                    <div class="admin-form-group" style="flex: 1; min-width: 80px;">
+                        <label for="pub-issue-input">Issue</label>
+                        <input type="text" id="pub-issue-input" placeholder="e.g. 1">
+                    </div>
+                    <div class="admin-form-group" style="flex: 1; min-width: 80px;">
+                        <label for="pub-artno-input">Art. No.</label>
+                        <input type="text" id="pub-artno-input" placeholder="e.g. 104888">
+                    </div>
+                    <div class="admin-form-group" style="flex: 1; min-width: 80px;">
+                        <label for="pub-pagestart-input">Page Start</label>
+                        <input type="number" id="pub-pagestart-input" placeholder="e.g. 95">
+                    </div>
+                    <div class="admin-form-group" style="flex: 1; min-width: 80px;">
+                        <label for="pub-pageend-input">Page End</label>
+                        <input type="number" id="pub-pageend-input" placeholder="e.g. 104">
+                    </div>
                 </div>
                 <div style="display: flex; gap: 1rem;">
                     <div class="admin-form-group" style="flex: 1;">

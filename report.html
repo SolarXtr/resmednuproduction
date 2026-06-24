@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publications Matrix Report - MedNU Research Analytics</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main CSS stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Matrix Spreadsheet Styling Adjustments */
+        .matrix-container {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            box-shadow: var(--shadow-sm);
+            overflow-x: auto;
+        }
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+            font-family: var(--font-body);
+            white-space: nowrap;
+        }
+        .matrix-table th, .matrix-table td {
+            border: 1px solid #cbd5e1;
+            padding: 0.4rem 0.6rem;
+            text-align: left;
+        }
+        .matrix-table th {
+            background: #f1f5f9;
+            color: #0f172a;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .matrix-table thead tr:first-child th {
+            background: #e2e8f0;
+        }
+        .matrix-table thead tr.summary-row th {
+            background: #f8fafc;
+            font-weight: bold;
+            color: #0d9488;
+            font-size: 0.85rem;
+            border-bottom: 2px solid #94a3b8;
+        }
+        .matrix-table tbody tr:hover {
+            background: rgba(241, 245, 249, 0.5);
+        }
+        .matrix-table td.center, .matrix-table th.center {
+            text-align: center;
+        }
+        .matrix-table td.number, .matrix-table th.number {
+            text-align: right;
+            font-family: monospace;
+        }
+        .matrix-table .tick {
+            font-weight: bold;
+            color: #0d9488;
+            background: rgba(13, 148, 136, 0.05);
+        }
+        .matrix-table .tick-q2 {
+            font-weight: bold;
+            color: #2563eb;
+            background: rgba(37, 99, 235, 0.05);
+        }
+        .matrix-table .tick-q3 {
+            font-weight: bold;
+            color: #d97706;
+            background: rgba(217, 119, 6, 0.05);
+        }
+        .matrix-table .tick-q4 {
+            font-weight: bold;
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.05);
+        }
+        .text-wrap-title {
+            white-space: normal;
+            min-width: 250px;
+            max-width: 400px;
+        }
+        .text-wrap-authors {
+            white-space: normal;
+            min-width: 150px;
+            max-width: 250px;
+        }
+    </style>
+</head>
+<body>
+    <div class="glass-bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div class="logo-text">
+                    <h2>MedNU</h2>
+                    <span>Research Analytics</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="index.html" class="nav-item">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Overview</span>
+                </a>
+                <a href="index.html#publications" class="nav-item">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span>Publications</span>
+                </a>
+                <a href="index.html#authors" class="nav-item">
+                    <i class="fa-solid fa-user-doctor"></i>
+                    <span>Researchers</span>
+                </a>
+                <a href="report.html" class="nav-item active">
+                    <i class="fa-solid fa-file-invoice"></i>
+                    <span>Reports Matrix</span>
+                </a>
+                <a href="admin.html" class="nav-item">
+                    <i class="fa-solid fa-user-gear"></i>
+                    <span>Admin Portal</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="datasource-badge" id="data-source-badge">
+                    <i class="fa-solid fa-database"></i>
+                    <span>DataSource: Scopus</span>
+                </div>
+                <div class="updated-time" id="retrieved-at">
+                    Syncing...
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="content-header">
+                <div class="header-title">
+                    <h1>Publications Matrix Report</h1>
+                    <p>Spreadsheet overview showing citation timelines and quartile metrics</p>
+                </div>
+                
+                <div class="header-controls">
+                    <div class="filter-group">
+                        <label for="report-quartile-select"><i class="fa-solid fa-chart-column"></i> Quartile Base:</label>
+                        <select id="report-quartile-select" style="padding: 0.4rem 0.6rem; border-radius: 6px; border: 1px solid var(--border-color); background: #f8fafc; font-size: 0.85rem; font-family: var(--font-body); font-weight: 500; outline: none; cursor: pointer;">
+                            <option value="scimago">SCImago SJR</option>
+                            <option value="scopus">Scopus CiteScore</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="report-year-select"><i class="fa-regular fa-calendar"></i> Year Filter:</label>
+                        <select id="report-year-select">
+                            <option value="all">All Years</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-refresh" id="btn-export-matrix" style="background: var(--accent-teal); color: white;" title="Download Excel">
+                        <i class="fa-solid fa-file-excel"></i>
+                        <span>Export Excel</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Spreadsheet Grid Area -->
+            <div class="dashboard-scroll-area">
+                <div class="matrix-container">
+                    <table class="matrix-table" id="report-matrix-table">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" class="center">no</th>
+                                <th rowspan="2">Authors</th>
+                                <th rowspan="2">Title</th>
+                                <th rowspan="2" class="center">Year</th>
+                                <th rowspan="2">Source title</th>
+                                <th rowspan="2" class="center">Volume</th>
+                                <th rowspan="2" class="center">Issue</th>
+                                <th rowspan="2" class="center">Art. No.</th>
+                                <th rowspan="2" class="center">Page start</th>
+                                <th rowspan="2" class="center">Page end</th>
+                                <th rowspan="2" class="center">Cited by</th>
+                                <th colspan="5" class="center">Citations Timeline</th>
+                                <th rowspan="2" class="center">subtotal</th>
+                                <th rowspan="2" class="center">Publish</th>
+                                <th colspan="4" class="center">Quartiles Distribution</th>
+                            </tr>
+                            <tr>
+                                <th class="center">2022</th>
+                                <th class="center">2023</th>
+                                <th class="center">2024</th>
+                                <th class="center">2025</th>
+                                <th class="center">2026</th>
+                                <th class="center">Q1</th>
+                                <th class="center">Q2</th>
+                                <th class="center">Q3</th>
+                                <th class="center">Q4</th>
+                            </tr>
+                            <tr class="summary-row" id="matrix-summary-row">
+                                <th class="center">-</th>
+                                <th>Total Results: <span id="sum-count">0</span></th>
+                                <th>-</th>
+                                <th class="center">-</th>
+                                <th>-</th>
+                                <th class="center">-</th>
+                                <th class="center">-</th>
+                                <th class="center">-</th>
+                                <th class="center">-</th>
+                                <th class="center">-</th>
+                                <th class="center" id="sum-cited-by">0</th>
+                                <th class="center" id="sum-cite-2022">0</th>
+                                <th class="center" id="sum-cite-2023">0</th>
+                                <th class="center" id="sum-cite-2024">0</th>
+                                <th class="center" id="sum-cite-2025">0</th>
+                                <th class="center" id="sum-cite-2026">0</th>
+                                <th class="center" id="sum-cite-subtotal">0</th>
+                                <th class="center" id="sum-published">0</th>
+                                <th class="center" id="sum-q1">0</th>
+                                <th class="center" id="sum-q2">0</th>
+                                <th class="center" id="sum-q3">0</th>
+                                <th class="center" id="sum-q4">0</th>
+                            </tr>
+                        </thead>
+                        <tbody id="matrix-tbody">
+                            <!-- Rows loaded dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Script Import -->
+    <script src="report.js"></script>
+</body>
+</html>

@@ -566,6 +566,11 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('pub-year-input').value = pub.year;
             document.getElementById('pub-citations-input').value = pub.citations;
             document.getElementById('pub-doi-input').value = pub.doi || "";
+            document.getElementById('pub-volume-input').value = pub.volume || "";
+            document.getElementById('pub-issue-input').value = pub.issue || "";
+            document.getElementById('pub-artno-input').value = pub.art_no || "";
+            document.getElementById('pub-pagestart-input').value = pub.page_start || "";
+            document.getElementById('pub-pageend-input').value = pub.page_end || "";
             document.getElementById('pub-q-scopus').value = pub.quartile_scopus || "";
             document.getElementById('pub-q-scimago').value = pub.quartile_scimago || "";
  
@@ -576,6 +581,11 @@ document.addEventListener('DOMContentLoaded', () => {
             publicationModalTitle.textContent = "Add New Article";
             publicationForm.reset();
             document.getElementById('publication-idx').value = "";
+            document.getElementById('pub-volume-input').value = "";
+            document.getElementById('pub-issue-input').value = "";
+            document.getElementById('pub-artno-input').value = "";
+            document.getElementById('pub-pagestart-input').value = "";
+            document.getElementById('pub-pageend-input').value = "";
             document.getElementById('pub-q-scopus').value = "";
             document.getElementById('pub-q-scimago').value = "";
             document.getElementById('db-scopus').checked = true;
@@ -613,6 +623,11 @@ document.addEventListener('DOMContentLoaded', () => {
             year: document.getElementById('pub-year-input').value.toString(),
             citations: parseInt(document.getElementById('pub-citations-input').value) || 0,
             doi: document.getElementById('pub-doi-input').value.trim() || null,
+            volume: document.getElementById('pub-volume-input').value.trim() || null,
+            issue: document.getElementById('pub-issue-input').value.trim() || null,
+            art_no: document.getElementById('pub-artno-input').value.trim() || null,
+            page_start: document.getElementById('pub-pagestart-input').value.trim() || null,
+            page_end: document.getElementById('pub-pageend-input').value.trim() || null,
             databases: databases,
             quartile_scopus: document.getElementById('pub-q-scopus').value || null,
             quartile_scimago: document.getElementById('pub-q-scimago').value || null
