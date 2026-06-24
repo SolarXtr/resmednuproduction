@@ -56,6 +56,21 @@ class AdminPortalHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_response(500)
                 self.end_headers()
                 self.wfile.write(str(e).encode('utf-8'))
+        elif parsed_path.path == '/api/sync':
+            try:
+                import subprocess
+                script_path = os.path.join(DIRECTORY, 'fetch_data.py')
+                subprocess.Popen(['python', script_path], cwd=DIRECTORY)
+                
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "success", "message": "Sync started in background"}).encode('utf-8'))
+            except Exception as e:
+                self.send_response(500)
+                self.end_headers()
+                self.wfile.write(str(e).encode('utf-8'))
         else:
             self.send_response(404)
             self.end_headers()
