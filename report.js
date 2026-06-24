@@ -59,13 +59,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const years = new Set(database.results.map(r => r.year).filter(y => y && y !== 'Unknown Year'));
         const sortedYears = Array.from(years).sort((a, b) => b - a);
         
-        reportYearSelect.innerHTML = `<option value="all">All Years</option>`;
+        reportYearSelect.innerHTML = `
+            <option value="last5">Last 5 Years</option>
+            <option value="last3">Last 3 Years</option>
+            <option value="all">All Years</option>
+        `;
         sortedYears.forEach(year => {
             const opt = document.createElement('option');
             opt.value = year;
             opt.textContent = year;
             reportYearSelect.appendChild(opt);
         });
+
+        // Set default filter to last 5 years
+        reportYearSelect.value = 'last5';
+        currentYear = 'last5';
     }
 
     // --- HELPER METRIC TRANSLATORS ---
@@ -117,10 +125,22 @@ document.addEventListener('DOMContentLoaded', () => {
         currentYear = reportYearSelect.value;
         activeQuartileSource = reportQuartileSelect.value;
 
+        // Find maximum year in the dataset to calculate relative ranges dynamically
+        const years = database.results.map(r => parseInt(r.year, 10)).filter(y => !isNaN(y));
+        const maxYear = years.length > 0 ? Math.max(...years) : new Date().getFullYear();
+
         // Apply Year Filter
         filteredResults = database.results.filter(pub => {
-            if (currentYear === 'all') return true;
-            return pub.year === currentYear;
+            const pubYr = parseInt(pub.year, 10);
+            if (currentYear === 'all') {
+                return true;
+            } else if (currentYear === 'last3') {
+                return !isNaN(pubYr) && pubYr >= (maxYear - 2);
+            } else if (currentYear === 'last5') {
+                return !isNaN(pubYr) && pubYr >= (maxYear - 4);
+            } else {
+                return pub.year === currentYear;
+            }
         });
 
         // Sort by Year (desc) then Citations (desc)
