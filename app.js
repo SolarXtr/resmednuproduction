@@ -150,6 +150,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- DATA FILTERING ---
     function applyFilter() {
+        if (quartileSourceSelect) {
+            activeQuartileSource = quartileSourceSelect.value;
+        }
         currentYear = yearFilter.value;
         
         // Find maximum year in the dataset to calculate relative ranges dynamically
