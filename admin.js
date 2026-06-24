@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const publicationSummaryContainer = document.getElementById('publication-summary-container');
 
     const btnGlobalSave = document.getElementById('btn-global-save');
+    const btnAdminSync = document.getElementById('btn-admin-sync');
 
     // Modals & Forms
     const researcherModal = document.getElementById('researcher-form-modal');
@@ -784,6 +785,39 @@ document.addEventListener('DOMContentLoaded', () => {
             btnGlobalSave.querySelector('span').textContent = "Save to JSON Files";
         }
     });
+
+    // --- ADMIN SYNC CONTROL ---
+    if (btnAdminSync) {
+        btnAdminSync.addEventListener('click', async () => {
+            btnAdminSync.disabled = true;
+            const icon = btnAdminSync.querySelector('i');
+            if (icon) icon.className = 'fa-solid fa-arrows-rotate fa-spin';
+            const span = btnAdminSync.querySelector('span');
+            if (span) span.textContent = 'Syncing...';
+            
+            try {
+                const response = await fetch('/api/sync', { method: 'POST' });
+                if (response.ok) {
+                    showToast("Scopus Ingestion Sync started in background...");
+                    setTimeout(async () => {
+                        await loadData();
+                        btnAdminSync.disabled = false;
+                        if (icon) icon.className = 'fa-solid fa-arrows-rotate';
+                        if (span) span.textContent = 'Sync from Scopus';
+                        showToast("Dataset updated successfully!");
+                    }, 4000);
+                } else {
+                    throw new Error('Sync endpoint returned error');
+                }
+            } catch (err) {
+                console.error('Trigger sync error:', err);
+                showToast("Failed to trigger API sync", "error");
+                btnAdminSync.disabled = false;
+                if (icon) icon.className = 'fa-solid fa-arrows-rotate';
+                if (span) span.textContent = 'Sync from Scopus';
+            }
+        });
+    }
 
     // --- REPORT GENERATION EXPORTS ---
     const btnExportCsv = document.getElementById('btn-export-csv');

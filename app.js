@@ -206,32 +206,15 @@ document.addEventListener('DOMContentLoaded', () => {
         renderAuthorsList();
     });
 
-    btnRefresh.addEventListener('click', async () => {
+    btnRefresh.addEventListener('click', () => {
         btnRefresh.disabled = true;
         const icon = btnRefresh.querySelector('i');
         if (icon) icon.className = 'fa-solid fa-arrows-rotate fa-spin';
         const span = btnRefresh.querySelector('span');
-        if (span) span.textContent = 'Syncing...';
-        
-        try {
-            const response = await fetch('/api/sync', { method: 'POST' });
-            if (response.ok) {
-                setTimeout(async () => {
-                    await loadData();
-                    btnRefresh.disabled = false;
-                    if (icon) icon.className = 'fa-solid fa-arrows-rotate';
-                    if (span) span.textContent = 'Sync';
-                }, 4000);
-            } else {
-                throw new Error('Sync endpoint returned error');
-            }
-        } catch (err) {
-            console.error('Trigger sync error, fallback loadData:', err);
-            await loadData();
-            btnRefresh.disabled = false;
-            if (icon) icon.className = 'fa-solid fa-arrows-rotate';
-            if (span) span.textContent = 'Sync';
-        }
+        if (span) span.textContent = 'Refreshing...';
+        setTimeout(() => {
+            window.location.reload();
+        }, 500);
     });
 
     // --- KPI COMPILATION ---
