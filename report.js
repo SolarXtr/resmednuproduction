@@ -77,6 +77,111 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- HELPER METRIC TRANSLATORS ---
+    function isCorrespondingAuthor(authorName, correspondingName) {
+        if (!authorName || !correspondingName) return false;
+        const aClean = authorName.toLowerCase().replace(/[^a-z\s]/g, '').trim();
+        const cClean = correspondingName.toLowerCase().replace(/[^a-z\s]/g, '').trim();
+        if (aClean === cClean) return true;
+        
+        const aParts = aClean.split(/\s+/);
+        const cParts = cClean.split(/\s+/);
+        if (aParts.length > 0 && cParts.length > 0) {
+            const aLast = aParts[aParts.length - 1];
+            const cLast = cParts[cParts.length - 1];
+            const aFirst = aParts[0];
+            const cFirst = cParts[0];
+            if (aLast === cLast && aFirst[0] === cFirst[0]) return true;
+            if (aParts.includes(cLast) || cParts.includes(aLast)) return true;
+        }
+        return false;
+    }
+
+    function formatAuthorName(name) {
+        if (!name) return '';
+        name = name.trim();
+        if (name.includes(',')) return name;
+        
+        const parts = name.split(/\s+/);
+        if (parts.length === 2) {
+            const first = parts[0];
+            const second = parts[1];
+            if (/^[A-Z]\.?([A-Z]\.?)?$/.test(second)) {
+                const cleanInitials = second.replace(/\.+/g, '').split('').join('.') + '.';
+                return `${first}, ${cleanInitials}`;
+            }
+        }
+        
+        if (parts.length >= 2) {
+            const last = parts[parts.length - 1];
+            const first = parts[0];
+            const initial = first.charAt(0).toUpperCase() + '.';
+            return `${last}, ${initial}`;
+        }
+        return name;
+    }
+
+    function formatFirstAndCorresponding(authors, correspondingAuthor) {
+        if (!authors || authors.length === 0) return '-';
+        
+        const first = authors[0];
+        const isFirstCorr = correspondingAuthor && (
+            first.trim().toLowerCase() === correspondingAuthor.trim().toLowerCase() ||
+            isCorrespondingAuthor(first, correspondingAuthor)
+        );
+        
+        if (isFirstCorr) {
+            return `<strong>${formatAuthorName(first)}</strong> <i class="fa-regular fa-envelope" title="First & Corresponding Author" style="color: var(--accent-purple); cursor: help;"></i>`;
+        }
+        
+        if (correspondingAuthor) {
+            const corrMatched = authors.find(auth => auth.trim().toLowerCase() === correspondingAuthor.trim().toLowerCase() || isCorrespondingAuthor(auth, correspondingAuthor));
+            const corrName = corrMatched ? corrMatched : correspondingAuthor;
+            return `${formatAuthorName(first)} (First), <strong>${formatAuthorName(corrName)}</strong> <i class="fa-regular fa-envelope" title="Corresponding Author" style="color: var(--accent-purple); cursor: help;"></i>`;
+        }
+        
+        return `${formatAuthorName(first)} (First)`;
+    }
+
+    function formatFirstAndCorrespondingText(authors, correspondingAuthor) {
+        if (!authors || authors.length === 0) return '-';
+        
+        const first = authors[0];
+        const isFirstCorr = correspondingAuthor && (
+            first.trim().toLowerCase() === correspondingAuthor.trim().toLowerCase() ||
+            isCorrespondingAuthor(first, correspondingAuthor)
+        );
+        
+        if (isFirstCorr) {
+            return `${formatAuthorName(first)} (First & Corresponding)`;
+        }
+        
+        if (correspondingAuthor) {
+            const corrMatched = authors.find(auth => auth.trim().toLowerCase() === correspondingAuthor.trim().toLowerCase() || isCorrespondingAuthor(auth, correspondingAuthor));
+            const corrName = corrMatched ? corrMatched : correspondingAuthor;
+            return `${formatAuthorName(first)} (First), ${formatAuthorName(corrName)} (Corresponding)`;
+        }
+        
+        return `${formatAuthorName(first)} (First)`;
+    }
+
+    function formatSourceTitle(pub) {
+        let text = pub.journal || 'Unknown Source';
+        const parts = [];
+        if (pub.volume) parts.push(`Vol. ${pub.volume}`);
+        if (pub.issue) parts.push(`No. ${pub.issue}`);
+        if (pub.art_no) parts.push(`Art. No. ${pub.art_no}`);
+        if (pub.page_start || pub.page_end) {
+            const pages = [];
+            if (pub.page_start) pages.push(pub.page_start);
+            if (pub.page_end) pages.push(pub.page_end);
+            parts.push(`pp. ${pages.join('-')}`);
+        }
+        if (parts.length > 0) {
+            text += `, ${parts.join(', ')}`;
+        }
+        return text;
+    }
+
     function formatPublishDate(coverDate, year) {
         if (!coverDate || coverDate === "Unknown Date") {
             return year ? `Yr ${year}` : '-';
@@ -187,7 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (filteredResults.length === 0) {
             matrixTbody.innerHTML = `
                 <tr>
-                    <td colspan="22" style="text-align: center; color: var(--text-muted); padding: 3rem;">
+                    <td colspan="17" style="text-align: center; color: var(--text-muted); padding: 3rem;">
                         No publication records found for the selected filter.
                     </td>
                 </tr>`;
@@ -199,7 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const tr = document.createElement('tr');
             
             // Format Author List
-            const authorList = pub.authors ? pub.authors.join(', ') : '-';
+            const authorList = formatFirstAndCorresponding(pub.authors, pub.corresponding_author);
             
             // Format Publish Date
             const publishStr = formatPublishDate(pub.coverDate, pub.year);
@@ -232,12 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td class="text-wrap-authors">${authorList}</td>
                 <td class="text-wrap-title">${pub.title}</td>
                 <td class="center">${pub.year || '-'}</td>
-                <td style="font-style: italic; white-space: normal; min-width: 150px;">${pub.journal || '-'}</td>
-                <td class="center">${pub.volume || '-'}</td>
-                <td class="center">${pub.issue || '-'}</td>
-                <td class="center">${pub.art_no || '-'}</td>
-                <td class="center">${pub.page_start || '-'}</td>
-                <td class="center">${pub.page_end || '-'}</td>
+                <td style="font-style: italic; white-space: normal; min-width: 250px;">${formatSourceTitle(pub)}</td>
                 <td class="number" style="font-weight:600; color:var(--accent-purple);">${pub.citations}</td>
                 <td class="number">${dist.timeline[2022] || '-'}</td>
                 <td class="number">${dist.timeline[2023] || '-'}</td>
@@ -301,7 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Define spreadsheet header row 1
         const headers1 = [
-            "no", "Authors", "Title", "Year", "Source title", "Volume", "Issue", "Art. No.", "Page start", "Page end", "Cited by",
+            "no", "Authors (First / Corresponding)", "Title", "Year", "Source title (Journal, Volume, Issue, Art No, Pages)", "Cited by",
             "Citations 2022", "Citations 2023", "Citations 2024", "Citations 2025", "Citations 2026", "subtotal", "Publish",
             "Q1", "Q2", "Q3", "Q4"
         ];
@@ -309,7 +409,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // summary totals row
         const summaryRow = [
-            "-", `Total Results: ${filteredResults.length}`, "-", "-", "-", "-", "-", "-", "-", "-",
+            "-", `Total Results: ${filteredResults.length}`, "-", "-", "-",
             sumCitedBy.textContent, sumCite2022.textContent, sumCite2023.textContent, sumCite2024.textContent, sumCite2025.textContent, sumCite2026.textContent,
             sumCiteSubtotal.textContent, sumPublished.textContent, sumQ1.textContent, sumQ2.textContent, sumQ3.textContent, sumQ4.textContent
         ];
@@ -317,7 +417,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // data rows
         filteredResults.forEach((pub, idx) => {
-            const authorList = pub.authors ? pub.authors.join('; ') : '-';
+            const authorList = formatFirstAndCorrespondingText(pub.authors, pub.corresponding_author);
             const publishStr = formatPublishDate(pub.coverDate, pub.year);
             const dist = distributeCitations(pub.citations, pub.year);
             const qVal = activeQuartileSource === 'scopus' ? pub.quartile_scopus : pub.quartile_scimago;
@@ -332,12 +432,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 authorList,
                 pub.title,
                 pub.year || "",
-                pub.journal || "",
-                pub.volume || "",
-                pub.issue || "",
-                pub.art_no || "",
-                pub.page_start || "",
-                pub.page_end || "",
+                formatSourceTitle(pub),
                 pub.citations || 0,
                 dist.timeline[2022] || "",
                 dist.timeline[2023] || "",
