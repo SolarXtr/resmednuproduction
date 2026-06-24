@@ -120,6 +120,20 @@ document.addEventListener('DOMContentLoaded', () => {
         return { timeline, subtotal };
     }
 
+    function calculateHIndex(citationsArray) {
+        if (!citationsArray || citationsArray.length === 0) return 0;
+        const sorted = [...citationsArray].sort((a, b) => b - a);
+        let hIndex = 0;
+        for (let i = 0; i < sorted.length; i++) {
+            if (sorted[i] >= i + 1) {
+                hIndex = i + 1;
+            } else {
+                break;
+            }
+        }
+        return hIndex;
+    }
+ 
     // --- DATA FILTER & RENDER ---
     function applyFilter() {
         currentYear = reportYearSelect.value;
@@ -239,6 +253,14 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             matrixTbody.appendChild(tr);
         });
+
+        // Calculate h-index for matrix
+        const citationsArray = filteredResults.map(r => r.citations || 0);
+        const hIndex = calculateHIndex(citationsArray);
+        const hIndexTextEl = document.getElementById('report-hindex-text');
+        if (hIndexTextEl) {
+            hIndexTextEl.textContent = `h-index = ${hIndex} (Of the ${filteredResults.length} documents considered for the h-index, ${hIndex} have been cited at least ${hIndex} times.)`;
+        }
 
         updateSummaryRow(
             filteredResults.length,
