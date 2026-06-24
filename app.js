@@ -869,12 +869,14 @@ document.addEventListener('DOMContentLoaded', () => {
                             name: cleanedAuth,
                             pubs: 0,
                             citations: 0,
+                            citationsList: [],
                             journals: new Set(),
                             department: deptName
                         };
                     }
                     authorStats[cleanedAuth].pubs++;
                     authorStats[cleanedAuth].citations += pub.citations;
+                    authorStats[cleanedAuth].citationsList.push(pub.citations || 0);
                     authorStats[cleanedAuth].journals.add(pub.journal);
                 }
             });
@@ -926,6 +928,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span class="author-stat-value">${author.pubs}</span>
                     </div>
                     <div class="author-stat-item">
+                        <span class="author-stat-label">h-index</span>
+                        <span class="author-stat-value" style="color: #ea580c;">${calculateHIndex(author.citationsList)}</span>
+                    </div>
+                    <div class="author-stat-item">
                         <span class="author-stat-label">Total Citations</span>
                         <span class="author-stat-value" style="color: var(--accent-purple);">${author.citations}</span>
                     </div>
@@ -961,6 +967,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    function calculateHIndex(citationsArray) {
+        if (!citationsArray || citationsArray.length === 0) return 0;
+        const sorted = [...citationsArray].sort((a, b) => b - a);
+        let hIndex = 0;
+        for (let i = 0; i < sorted.length; i++) {
+            if (sorted[i] >= i + 1) {
+                hIndex = i + 1;
+            } else {
+                break;
+            }
+        }
+        return hIndex;
+    }
+
     // Function to render researcher detail profile inside modal
     function showResearcherModal(authorName, authorDept) {
         // Filter publications belonging to this author
@@ -970,6 +990,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const totalCites = authorPapers.reduce((sum, pub) => sum + pub.citations, 0);
         const avgCites = authorPapers.length > 0 ? (totalCites / authorPapers.length).toFixed(1) : 0;
+        const citationsList = authorPapers.map(p => p.citations || 0);
+        const hIndex = calculateHIndex(citationsList);
 
         // Set Profile details
         modalAuthorName.textContent = authorName;
@@ -977,6 +999,7 @@ document.addEventListener('DOMContentLoaded', () => {
         modalAvatar.textContent = authorName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 
         modalStatPubs.textContent = authorPapers.length;
+        document.getElementById('modal-stat-hindex').textContent = hIndex;
         modalStatCitations.textContent = totalCites.toLocaleString();
         modalStatAvg.textContent = avgCites;
 
