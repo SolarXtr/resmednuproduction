@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เกี่ยวกับระบบ - MedNU Research Analytics</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main CSS stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: 'Sarabun', 'Inter', sans-serif;
+        }
+        .about-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 18px;
+            padding: 2.2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-soft);
+        }
+        .about-section-title {
+            font-family: 'Outfit', 'Sarabun', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 2.5px solid var(--accent-blue-glow);
+            padding-bottom: 0.5rem;
+        }
+        .about-section-title i {
+            color: var(--accent-blue);
+        }
+        .timeline {
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 0;
+        }
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 3px;
+            background-color: var(--border-color);
+            top: 0;
+            bottom: 0;
+            left: 30px;
+            margin-left: -1.5px;
+        }
+        .timeline-item {
+            padding: 10px 30px 25px 70px;
+            position: relative;
+            background-color: inherit;
+            width: 100%;
+        }
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            left: 22px;
+            background-color: #ffffff;
+            border: 4px solid var(--accent-blue);
+            top: 15px;
+            border-radius: 50%;
+            z-index: 1;
+            transition: all 0.2s ease;
+        }
+        .timeline-item:hover::after {
+            transform: scale(1.2);
+            background-color: var(--accent-blue);
+        }
+        .timeline-content {
+            padding: 1.2rem;
+            background: #ffffff;
+            position: relative;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+        }
+        .timeline-content h3 {
+            font-family: 'Outfit', 'Sarabun', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+        .timeline-content p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        /* Sitemap Visual Style */
+        .sitemap-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        .sitemap-node {
+            background: #ffffff;
+            border: 1.5px solid var(--border-color);
+            border-radius: 14px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+        }
+        .sitemap-node:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent-blue);
+            box-shadow: var(--shadow-hover);
+        }
+        .sitemap-node i {
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .sitemap-node h4 {
+            font-family: 'Outfit', 'Sarabun', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        .sitemap-node p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+        .sitemap-connector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+        }
+        /* Status badge */
+        .status-badge-custom {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: rgba(13, 148, 136, 0.1);
+            color: var(--accent-teal);
+            border: 1px solid rgba(13, 148, 136, 0.15);
+        }
+        .badge-purple {
+            background: rgba(124, 58, 237, 0.1);
+            color: var(--accent-purple);
+            border: 1px solid rgba(124, 58, 237, 0.15);
+        }
+        /* Bullet Lists spacing */
+        .thai-list {
+            margin-left: 1.2rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+        .thai-list li {
+            margin-bottom: 0.4rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="glass-bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div class="logo-text">
+                    <h2>MedNU</h2>
+                    <span>Research Analytics</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="index.html" class="nav-item">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Overview</span>
+                </a>
+                <a href="index.html#publications" class="nav-item">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span>Publications</span>
+                </a>
+                <a href="index.html#authors" class="nav-item">
+                    <i class="fa-solid fa-user-doctor"></i>
+                    <span>Researchers</span>
+                </a>
+                <a href="about.html" class="nav-item active">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>เกี่ยวกับระบบ</span>
+                </a>
+                <a href="admin.html" class="nav-item">
+                    <i class="fa-solid fa-user-gear"></i>
+                    <span>Admin Portal</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="datasource-badge" style="color: var(--accent-teal);">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span>Status: Active</span>
+                </div>
+                <div class="updated-time">
+                    v1.2.0 Stable
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="content-header">
+                <div class="header-title">
+                    <h1>เกี่ยวกับระบบบริหารข้อมูลวิจัย (About Project)</h1>
+                    <p>ประวัติการพัฒนา การแก้ปัญหา ผลการดำเนินการ และโครงสร้างระบบ</p>
+                </div>
+            </header>
+
+            <!-- Scrollable Content Area -->
+            <div class="dashboard-scroll-area">
+                
+                <!-- Section 1: Overview & Initiation -->
+                <div class="about-card">
+                    <div class="about-section-title">
+                        <i class="fa-solid fa-lightbulb"></i>
+                        <span>การริเริ่มโครงการ (Initiation)</span>
+                    </div>
+                    <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.8; margin-bottom: 1rem;">
+                        ระบบ <strong>MedNU Research Analytics</strong> ริเริ่มขึ้นจากความต้องการติดตาม วิเคราะห์ และรวบรวมข้อมูลผลงานตีพิมพ์ทางวิชาการระดับนานาชาติของคณาจารย์และนักวิจัย สังกัดคณะแพทยศาสตร์ มหาวิทยาลัยนเรศวร เพื่อเพิ่มประสิทธิภาพการวัดผลคุณภาพงานวิจัยตามเกณฑ์มาตรฐานระดับสากล และสามารถประมวลผลข้อมูลเกณฑ์คุณภาพวารสาร (Quartiles) ได้อย่างถูกต้อง แม่นยำ และเป็นปัจจุบัน โดยลดขั้นตอนการทำงานด้วยมือ (Manual) ของเจ้าหน้าที่ลง
+                    </p>
+                </div>
+
+                <!-- Section 2: Timeline of Project (Planning & Development) -->
+                <div class="about-card">
+                    <div class="about-section-title">
+                        <i class="fa-solid fa-list-check"></i>
+                        <span>ขั้นตอนการวางแผนและการพัฒนา (Planning & Development Timeline)</span>
+                    </div>
+                    
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-content">
+                                <span class="status-badge-custom">ระยะที่ 1</span>
+                                <h3 style="margin-top: 0.5rem;">การวางแผนและการออกแบบระบบ (System Planning)</h3>
+                                <p>กำหนดเทคโนโลยีและสถาปัตยกรรมระบบ โดยเลือกใช้เว็บแบบ Single Page App (SPA) ร่วมกับฐานข้อมูล JSON (data.json / researchers.json) เพื่อลดความซับซ้อนในการติดตั้ง เขียน API ดึงข้อมูลผ่าน Python (Scopus & PubMed Ingestion Engine) และกำหนดเกณฑ์ตัววัดเชิงคุณภาพ เช่น ยอดการอ้างอิงสะสมรายปี และค่า h-index ของระบบ</p>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="timeline-content">
+                                <span class="status-badge-custom">ระยะที่ 2</span>
+                                <h3 style="margin-top: 0.5rem;">การพัฒนาเว็บแอปพลิเคชันและการแสดงผลข้อมูล (Frontend Development)</h3>
+                                <p>ออกแบบส่วนติดต่อผู้ใช้งาน (UI) ที่มีความหรูหราทันสมัยในสไตล์ Glassmorphic ใช้ระบบโทนสีพรีเมียม (Royal Blue, Emerald Teal, Soft Indigo) แสดงผล KPI การเติบโตของผลงานวิจัย กราฟสถิติรายปีด้วย Chart.js และจัดกลุ่มโครงสร้างแผนก/สาขาวิชาแพทย์ได้อย่างสมบูรณ์แบบ</p>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="timeline-content">
+                                <span class="status-badge-custom">ระยะที่ 3</span>
+                                <h3 style="margin-top: 0.5rem;">การเชื่อมโยงระบบจัดการข้อมูลแบบ On-Demand (Admin Portal Sync)</h3>
+                                <p>พัฒนาชุดควบคุม Admin Portal ที่สามารถจัดการรายชื่อนักวิจัย (Add/Edit/Delete Researchers) และเพิ่มฟีเจอร์กรอกข้อมูลบรรณานุกรมสำหรับบทความวิจัยที่ตกหล่น (เช่น Volume, Issue, Pages) พร้อมทั้งระบบการแปลง/บันทึกไฟล์สถิติในรูปแบบ Excel (CSV)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Troubleshooting -->
+                <div class="about-card">
+                    <div class="about-section-title">
+                        <i class="fa-solid fa-screwdriver-wrench"></i>
+                        <span>การแก้ไขปัญหาสำคัญในระหว่างพัฒนา (Troubleshooting)</span>
+                    </div>
+                    <ul class="thai-list">
+                        <li><strong>ปัญหาข้อมูล Quartiles ไม่สลับตาม Selector:</strong> ได้รับการแก้ไขโดยการแยกฟิลด์เก็บข้อมูล Quartiles แยกขาดจากกันในฐานข้อมูล JSON สำหรับวารสารทั้งสองรูปแบบ (`quartile_scopus` และ `quartile_scimago`) ทำให้ฝั่งเบราว์เซอร์สามารถดึงค่าเพื่อแสดงสถิติและเครื่องหมายติ๊กถูกได้สอดคล้องตามตัวเลือกอย่างสมบูรณ์แบบ</li>
+                        <li><strong>ปัญหาตาราง Matrix รายงานล้นขอบจอ:</strong> แก้ไขโดยการใช้หลักการเขียนบรรณานุกรมมาตรฐาน โดยการยุบข้อมูล Volume, Issue, Art No., และ Pages เข้าไปไว้ในคอลัมน์ Source Title รวมถึงกรองให้แสดงผลเฉพาะ First Author และ Corresponding Author ช่วยลดความกว้างของตารางและแสดงผลได้อย่างเหมาะสม พร้อมระบบจัดระเบียบ CSS แบบ Scroll wrapper</li>
+                        <li><strong>ปัญหาข้อจำกัด API Key ภายนอกเน็ตเวิร์กมหาวิทยาลัย:</strong> เนื่องจาก Scopus API จะจำกัดสิทธิ์การขอข้อมูลหากดึงจากภายนอกไอพีมหาวิทยาลัย จึงได้จำกัดสิทธิ์การอัปเดตข้อมูล (Sync) ให้ทำได้เฉพาะในส่วนของ Admin Portal เพื่อให้ผู้ดูแลระบบที่เชื่อมต่อ NU Network หรือต่อ NU VPN เท่านั้นเป็นคนสั่งการดึงข้อมูล ส่วนหน้า Dashboard บุคคลทั่วไปได้เปลี่ยนปุ่มให้ทำหน้าที่รีเฟรชหน้าจอ (UI Refresh) แทน เพื่อความปลอดภัยของข้อมูลและรักษาความสมบูรณ์ 100% ของข้อมูลระบบ</li>
+                    </ul>
+                </div>
+
+                <!-- Section 4: Project Outcomes -->
+                <div class="about-card">
+                    <div class="about-section-title">
+                        <i class="fa-solid fa-square-poll-vertical"></i>
+                        <span>ผลการดำเนินการปัจจุบัน (Project Outcomes)</span>
+                    </div>
+                    <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.8; margin-bottom: 1rem;">
+                        ปัจจุบันระบบสามารถนำส่งผลสถิติงานวิจัยระดับคณะแพทยศาสตร์ได้อย่างครบถ้วน โดยประมวลผลข้อมูลงานวิจัยทั้งหมดมากกว่า 870 รายการ รองรับการคำนวณ h-index ทันทีแบบ real-time บนหน้าจอ Dashboard และจัดเตรียมรายงานในลักษณะ spreadsheet สำหรับดาวน์โหลดได้อย่างง่ายดาย ข้อมูลทั้งหมดถูกอัปเดตและเก็บรักษาเวอร์ชันล่าสุดไว้บน GitHub เรียบร้อยแล้ว
+                    </p>
+                </div>
+
+                <!-- Section 5: Future Enhancements -->
+                <div class="about-card">
+                    <div class="about-section-title">
+                        <i class="fa-solid fa-forward-step"></i>
+                        <span>แนวทางการพัฒนาต่อเนื่องในอนาคต (Future Developments)</span>
+                    </div>
+                    <ul class="thai-list">
+                        <li><strong>ระบบส่งรายงานอีเมล์อัตโนมัติ (Email Reporting Integration):</strong> พัฒนาระบบส่งรายงานสรุปสถิติประจำเดือนไปยังผู้บริหารหรือผู้ดูแลระบบที่กำหนดผ่านโปรโตคอล SMTP ทันทีหลังจากดำเนินการประสานข้อมูลเสร็จสิ้น</li>
+                        <li><strong>ระบบแสดงผลความร่วมมือระหว่างเครือข่ายวิจัย (Research Collaboration Map):</strong> แสดงกราฟโครงข่ายเชื่อมโยงผู้วิจัยหลักและผู้วิจัยร่วมทั้งภายในและต่างประเทศเพื่อวิเคราะห์ความเข้มแข็งของการสร้างผลงานวิชาการ</li>
+                        <li><strong>ระบบแจ้งเตือนผลงานวิจัยตีพิมพ์ใหม่ทางไลน์ (LINE Notify/Chatbot Integration):</strong> ส่งการแจ้งเตือนสถิติบทความที่ได้รับการตีพิมพ์ใหม่แบบอัตโนมัติเข้ากลุ่มไลน์ของหน่วยงานเพื่อเผยแพร่ความสำเร็จ</li>
+                    </ul>
+                </div>
+
+                <!-- Section 6: Sitemap -->
+                <div class="about-card">
+                    <div class="about-section-title">
+                        <i class="fa-solid fa-sitemap"></i>
+                        <span>แผนที่เว็บไซต์ (Site Map)</span>
+                    </div>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.2rem;">
+                        คลิกที่การ์ดด้านล่างเพื่อสลับหรือเข้าถึงหน้าต่างๆ ภายในระบบบริหารข้อมูลวิจัย:
+                    </p>
+                    
+                    <div class="sitemap-grid">
+                        <a href="index.html" class="sitemap-node">
+                            <i class="fa-solid fa-chart-pie"></i>
+                            <h4>หน้าหลัก Dashboard</h4>
+                            <p>แสดงผลสถิติ ภาพรวมงานวิจัย กราฟสถิติต่างๆ และรายชื่อผู้วิจัย</p>
+                        </a>
+
+                        <a href="about.html" class="sitemap-node" style="border-color: var(--accent-blue); background: var(--accent-blue-glow);">
+                            <i class="fa-solid fa-circle-info" style="background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+                            <h4>เกี่ยวกับระบบ (หน้านี้)</h4>
+                            <p>ข้อมูลความเป็นมา โครงสร้างเว็บไซต์ และแนวทางการพัฒนาระบบ</p>
+                        </a>
+
+                        <a href="admin.html" class="sitemap-node">
+                            <i class="fa-solid fa-user-gear"></i>
+                            <h4>หน้าหลัก Admin Portal</h4>
+                            <p>เครื่องมือสำหรับจัดการรายชื่อนักวิจัย แก้ไขบทความ และซิงก์ฐานข้อมูล</p>
+                        </a>
+
+                        <a href="report.html" class="sitemap-node">
+                            <i class="fa-solid fa-file-invoice"></i>
+                            <h4>หน้ารายงาน Reports Matrix</h4>
+                            <p>ตาราง Spreadsheet วิเคราะห์ช่วงปีสถิติและจัดจำแนกระดับ Quartile (เฉพาะ Admin)</p>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+</body>
+</html>
