@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let filteredResults = [];
     let currentYear = 'all';
     let activeQuartileSource = 'scimago';
+    let sortField = 'year';
+    let sortDirection = 'desc';
 
     // DOM Elements
     const reportQuartileSelect = document.getElementById('report-quartile-select');
@@ -262,12 +264,38 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Sort by Year (desc) then Citations (desc)
+        // Sort by selected field
         filteredResults.sort((a, b) => {
-            const yrA = parseInt(a.year, 10) || 0;
-            const yrB = parseInt(b.year, 10) || 0;
-            if (yrB !== yrA) return yrB - yrA;
-            return (b.citations || 0) - (a.citations || 0);
+            let valA, valB;
+            if (sortField === 'no') {
+                valA = database.results.indexOf(a);
+                valB = database.results.indexOf(b);
+            } else if (sortField === 'author') {
+                valA = (a.authors && a.authors[0] || '').toLowerCase();
+                valB = (b.authors && b.authors[0] || '').toLowerCase();
+            } else if (sortField === 'title') {
+                valA = (a.title || '').toLowerCase();
+                valB = (b.title || '').toLowerCase();
+            } else if (sortField === 'year') {
+                valA = parseInt(a.year, 10) || 0;
+                valB = parseInt(b.year, 10) || 0;
+            } else if (sortField === 'source') {
+                valA = (a.journal || '').toLowerCase();
+                valB = (b.journal || '').toLowerCase();
+            } else if (sortField === 'citations') {
+                valA = a.citations || 0;
+                valB = b.citations || 0;
+            } else if (sortField === 'subtotal') {
+                valA = distributeCitations(a.citations, a.year).subtotal;
+                valB = distributeCitations(b.citations, b.year).subtotal;
+            } else if (sortField === 'publish') {
+                valA = formatPublishDate(a.coverDate, a.year);
+                valB = formatPublishDate(b.coverDate, b.year);
+            }
+            
+            if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+            if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+            return 0;
         });
 
         renderMatrix();
@@ -464,6 +492,35 @@ document.addEventListener('DOMContentLoaded', () => {
     reportQuartileSelect.addEventListener('change', applyFilter);
     reportYearSelect.addEventListener('change', applyFilter);
     btnExportMatrix.addEventListener('click', exportMatrixToCSV);
+
+    // --- SORT CLICK EVENT LISTENERS ---
+    document.querySelectorAll('.sortable-header').forEach(header => {
+        header.addEventListener('click', () => {
+            const field = header.getAttribute('data-sort');
+            
+            if (sortField === field) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortField = field;
+                // Default to desc for citations and year, asc for others
+                sortDirection = (field === 'citations' || field === 'year' || field === 'subtotal') ? 'desc' : 'asc';
+            }
+            
+            // Update sorting icons
+            document.querySelectorAll('.sortable-header i').forEach(icon => {
+                icon.className = "fa-solid fa-sort";
+                icon.style.opacity = "0.6";
+            });
+            
+            const icon = header.querySelector('i');
+            if (icon) {
+                icon.className = sortDirection === 'asc' ? "fa-solid fa-sort-up" : "fa-solid fa-sort-down";
+                icon.style.opacity = "1";
+            }
+            
+            applyFilter();
+        });
+    });
 
     // Initial Load
     loadData();

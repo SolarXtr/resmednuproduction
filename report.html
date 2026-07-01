@@ -95,6 +95,9 @@
             min-width: 150px;
             max-width: 250px;
         }
+        .matrix-table th.sortable-header:hover {
+            background: #cbd5e1 !important;
+        }
     </style>
 </head>
 <body>
@@ -142,12 +145,12 @@
             </nav>
 
             <div class="sidebar-footer">
-                <div class="datasource-badge" id="data-source-badge">
-                    <i class="fa-solid fa-database"></i>
-                    <span>DataSource: Scopus</span>
+                <div class="datasource-badge" id="data-source-badge" style="color: #14b8a6; background: #f8fafc; border: 1px solid var(--border-color);">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span>DataSource: Scopus API</span>
                 </div>
                 <div class="updated-time" id="retrieved-at">
-                    Syncing...
+                    Sync: 2026-06-24 15:45:33
                 </div>
                 <div class="app-footnote" style="font-size: 0.68rem; color: var(--text-muted); text-align: center; margin-top: 0.4rem; line-height: 1.4; border-top: 1px solid var(--border-color); padding-top: 0.4rem; width: 100%;">
                     Developed by Antigravity v2.1.4<br><i class="fa-solid fa-user" style="font-size: 0.65rem; margin-right: 0.2rem; color: var(--text-muted);"></i><a href="mailto:tinnakornh@gmail.com" style="color: var(--accent-blue); text-decoration: none; font-weight: 500;">TINNAKORNH</a>
@@ -195,15 +198,15 @@
                     <table class="matrix-table" id="report-matrix-table">
                         <thead>
                              <tr>
-                                <th rowspan="2" class="center">no</th>
-                                <th rowspan="2">Authors (First / Corresponding)</th>
-                                <th rowspan="2">Title</th>
-                                <th rowspan="2" class="center">Year</th>
-                                <th rowspan="2">Source title</th>
-                                <th rowspan="2" class="center">Cited by</th>
+                                <th rowspan="2" class="center sortable-header" data-sort="no" style="cursor: pointer;">no <i class="fa-solid fa-sort" style="font-size: 0.75rem; margin-left: 0.2rem; opacity: 0.6;"></i></th>
+                                <th rowspan="2" class="sortable-header" data-sort="author" style="cursor: pointer;">Authors (First / Corresponding) <i class="fa-solid fa-sort" style="font-size: 0.75rem; margin-left: 0.2rem; opacity: 0.6;"></i></th>
+                                <th rowspan="2" class="sortable-header" data-sort="title" style="cursor: pointer;">Title <i class="fa-solid fa-sort" style="font-size: 0.75rem; margin-left: 0.2rem; opacity: 0.6;"></i></th>
+                                <th rowspan="2" class="center sortable-header" data-sort="year" style="cursor: pointer;">Year <i class="fa-solid fa-sort-down" style="font-size: 0.75rem; margin-left: 0.2rem;"></i></th>
+                                <th rowspan="2" class="sortable-header" data-sort="source" style="cursor: pointer;">Source title <i class="fa-solid fa-sort" style="font-size: 0.75rem; margin-left: 0.2rem; opacity: 0.6;"></i></th>
+                                <th rowspan="2" class="center sortable-header" data-sort="citations" style="cursor: pointer;">Cited by <i class="fa-solid fa-sort" style="font-size: 0.75rem; margin-left: 0.2rem; opacity: 0.6;"></i></th>
                                 <th colspan="5" class="center">Citations Timeline</th>
-                                <th rowspan="2" class="center">subtotal</th>
-                                <th rowspan="2" class="center">Publish</th>
+                                <th rowspan="2" class="center sortable-header" data-sort="subtotal" style="cursor: pointer;">subtotal <i class="fa-solid fa-sort" style="font-size: 0.75rem; margin-left: 0.2rem; opacity: 0.6;"></i></th>
+                                <th rowspan="2" class="center sortable-header" data-sort="publish" style="cursor: pointer;">Publish <i class="fa-solid fa-sort" style="font-size: 0.75rem; margin-left: 0.2rem; opacity: 0.6;"></i></th>
                                 <th colspan="4" class="center">Quartiles Distribution</th>
                             </tr>
                             <tr>
