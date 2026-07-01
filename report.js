@@ -289,8 +289,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 valA = distributeCitations(a.citations, a.year).subtotal;
                 valB = distributeCitations(b.citations, b.year).subtotal;
             } else if (sortField === 'publish') {
-                valA = formatPublishDate(a.coverDate, a.year);
-                valB = formatPublishDate(b.coverDate, b.year);
+                valA = a.coverDate || a.year || '0000-00-00';
+                valB = b.coverDate || b.year || '0000-00-00';
             }
             
             if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
