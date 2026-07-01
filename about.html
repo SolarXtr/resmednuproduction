@@ -334,7 +334,29 @@
                     </ul>
                 </div>
 
-                <!-- Section 6: Sitemap -->
+                <!-- Section 6: Data Synchronization Guide -->
+                <div class="about-card">
+                    <div class="about-section-title">
+                        <i class="fa-solid fa-arrows-rotate"></i>
+                        <span>วิธีการประสานข้อมูลและอัปเดตระบบ (Data Synchronization Guide)</span>
+                    </div>
+                    <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.8; margin-bottom: 1rem;">
+                        เพื่อให้ฐานข้อมูลสิ่งพิมพ์และค่าการอ้างอิงอัปเดตอย่างสมบูรณ์ ถูกต้องครบถ้วน 100% ผู้ดูแลระบบโปรดดำเนินตามขั้นตอนประสานข้อมูลดังนี้:
+                    </p>
+                    <ul class="thai-list">
+                        <li><strong>การเข้าถึงเครือข่าย มน. (NU Network / VPN):</strong> การซิงก์ดึงข้อมูลจาก Scopus API จำเป็นต้องกระทำผ่าน IP Address ภายในเครือข่ายของมหาวิทยาลัยนเรศวร หรือต่อระบบ VPN มน. ไว้เท่านั้น</li>
+                        <li><strong>การเรียกใช้คำสั่งประสานข้อมูล (Sync Data):</strong>
+                            <ol style="margin-left: 1.2rem; margin-top: 0.25rem;">
+                                <li>ทำการเข้าสู่ระบบหน้า **Admin Portal** ([admin.html](admin.html))</li>
+                                <li>กดปุ่มสีเขียว **Sync from Scopus** ตรงแถบ Sidebar นำทางด้านล่างซ้าย</li>
+                                <li>ระบบหลังบ้านจะทำงานแบบ Background Task เรียกโปรแกรม `fetch_data.py` เพื่อประสานข้อมูลอัปเดตไฟล์ `data.json` ทันที</li>
+                            </ol>
+                        </li>
+                        <li><strong>การจัดเก็บไฟล์ฐานข้อมูลถาวร:</strong> ทุกครั้งที่มีการเพิ่ม แก้ไข หรือลบข้อมูลผู้วิจัยและสิ่งตีพิมพ์ด้วยมือ เจ้าหน้าที่ต้องกดปุ่ม **"Save to JSON Files"** เพื่อบันทึกข้อมูลเก็บลงในโฮสต์ระบบไฟล์ถาวร</li>
+                    </ul>
+                </div>
+
+                <!-- Section 7: Sitemap -->
                 <div class="about-card">
                     <div class="about-section-title">
                         <i class="fa-solid fa-sitemap"></i>
@@ -371,7 +393,7 @@
                     </div>
                 </div>
 
-                <!-- Section 7: Footnote Card -->
+                <!-- Section 8: Footnote Card -->
                 <div class="about-card" style="display: flex; justify-content: center; align-items: center; padding: 1.5rem; background: rgba(255, 255, 255, 0.75);">
                     <div style="text-align: center; max-width: 320px; width: 100%;">
                         <div style="font-size: 0.85rem; color: var(--text-muted); text-align: center; line-height: 1.6; width: 100%;">
