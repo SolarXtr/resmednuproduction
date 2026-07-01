@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Application State
     let database = null;
     let filteredResults = [];
-    let currentYear = 'all';
+    let currentYear = 'last5';
     
     // Pagination state
     let currentPage = 1;
@@ -134,11 +134,12 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Reset and populate with quick timeframe filters
         yearFilter.innerHTML = `
-            <option value="all">All Years</option>
+            <option value="last5" selected>Last 5 Years</option>
             <option value="last3">Last 3 Years</option>
-            <option value="last5">Last 5 Years</option>
             <option value="last10">Last 10 Years</option>
+            <option value="all">All Years</option>
         `;
+        yearFilter.value = 'last5';
         
         sortedYears.forEach(year => {
             const opt = document.createElement('option');
