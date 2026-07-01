@@ -405,5 +405,37 @@
             </div>
         </main>
     </div>
+    <!-- Inline script to load and display real-time dataset retrieved time -->
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const retrievedTimeEl = document.getElementById('retrieved-at');
+            const dataSourceBadge = document.getElementById('data-source-badge');
+            
+            try {
+                const response = await fetch('data.json');
+                if (response.ok) {
+                    const database = await response.json();
+                    if (retrievedTimeEl && database.retrieved_at) {
+                        retrievedTimeEl.textContent = `Sync: ${database.retrieved_at}`;
+                    }
+                    if (dataSourceBadge) {
+                        if (database.data_source === 'mock_data') {
+                            dataSourceBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> <span>DataSource: Sandbox Mode</span>`;
+                            dataSourceBadge.style.color = '#eab308';
+                            dataSourceBadge.style.background = '#f8fafc';
+                            dataSourceBadge.style.border = '1px solid var(--border-color)';
+                        } else {
+                            dataSourceBadge.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>DataSource: Scopus API</span>`;
+                            dataSourceBadge.style.color = '#14b8a6';
+                            dataSourceBadge.style.background = '#f8fafc';
+                            dataSourceBadge.style.border = '1px solid var(--border-color)';
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error('Error fetching dynamic sync time in about.html:', err);
+            }
+        });
+    </script>
 </body>
 </html>
