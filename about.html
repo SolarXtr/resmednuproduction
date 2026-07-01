@@ -356,7 +356,28 @@
                     </ul>
                 </div>
 
-                <!-- Section 7: Sitemap -->
+                <!-- Section 7: Database Structure & Connections -->
+                <div class="about-card">
+                    <div class="about-section-title">
+                        <i class="fa-solid fa-database"></i>
+                        <span>โครงสร้างฐานข้อมูลและแหล่งเชื่อมโยงข้อมูล (Database Structure & APIs)</span>
+                    </div>
+                    <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.8; margin-bottom: 1rem;">
+                        ระบบรวบรวมและวิเคราะห์ข้อมูลผ่านการทำงานร่วมกันระหว่างฐานข้อมูลท้องถิ่นและ API ดึงข้อมูลภายนอก ดังนี้:
+                    </p>
+                    <h4 style="font-size: 1rem; color: var(--text-primary); margin-top: 1rem; margin-bottom: 0.5rem; font-weight: 700;"><i class="fa-solid fa-folder-open" style="color: #ea580c; margin-right: 0.4rem;"></i>ฐานข้อมูลภายในระบบ (Internal JSON Databases):</h4>
+                    <ul class="thai-list" style="margin-bottom: 1rem;">
+                        <li><strong>researchers.json:</strong> ฐานข้อมูลทำเนียบรายชื่อคณาจารย์และนักวิจัยคณะแพทยศาสตร์ มน. จัดเก็บข้อมูลสังกัดแผนก รหัส Scopus ID และคำสืบค้นเฉพาะ</li>
+                        <li><strong>data.json:</strong> ฐานข้อมูลจัดเก็บรายละเอียดบทความวิจัยทั้งหมด ยอดการอ้างอิง ค่า Quartiles และข้อมูลบรรณานุกรมเชิงลึก โดยทำหน้าที่เป็นหน่วยเก็บข้อมูลชั่วคราว (Cache Database)</li>
+                    </ul>
+                    <h4 style="font-size: 1rem; color: var(--text-primary); margin-top: 1rem; margin-bottom: 0.5rem; font-weight: 700;"><i class="fa-solid fa-globe" style="color: #2563eb; margin-right: 0.4rem;"></i>แหล่งข้อมูลวิจัยภายนอก (External Resource APIs):</h4>
+                    <ul class="thai-list">
+                        <li><strong>Scopus API (Elsevier):</strong> แหล่งข้อมูลหลักสำหรับดึงรายชื่อบทความที่ถูกจัดดัชนี (Indexed Publications) ยอดจำนวนการอ้างอิงสะสม และข้อมูลระดับชั้นวารสาร (Quartiles)</li>
+                        <li><strong>PubMed API (NCBI Entrez):</strong> ฐานข้อมูลเปรียบเทียบในแวดวงวิทยาศาสตร์การแพทย์เพื่อเติมเต็มส่วนของข้อมูลที่ขาดหายหรือตรวจสอบความถูกต้อง</li>
+                    </ul>
+                </div>
+
+                <!-- Section 8: Sitemap -->
                 <div class="about-card">
                     <div class="about-section-title">
                         <i class="fa-solid fa-sitemap"></i>
@@ -393,7 +414,7 @@
                     </div>
                 </div>
 
-                <!-- Section 8: Footnote Card -->
+                <!-- Section 9: Footnote Card -->
                 <div class="about-card" style="display: flex; justify-content: center; align-items: center; padding: 1.5rem; background: rgba(255, 255, 255, 0.75);">
                     <div style="text-align: center; max-width: 320px; width: 100%;">
                         <div style="font-size: 0.85rem; color: var(--text-muted); text-align: center; line-height: 1.6; width: 100%;">
