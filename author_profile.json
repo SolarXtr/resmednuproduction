@@ -1,0 +1,390 @@
+{
+    "author-retrieval-response": [
+        {
+            "@status": "found",
+            "@_fa": "true",
+            "coredata": {
+                "prism:url": "http://api.elsevier.com/content/author/author_id/6506446785",
+                "dc:identifier": "AUTHOR_ID:6506446785",
+                "eid": "9-s2.0-6506446785",
+                "document-count": "12",
+                "cited-by-count": "240",
+                "citation-count": "242",
+                "link": [
+                    {
+                        "@href": "https://www.scopus.com/authid/detail.uri?partnerID=HzOxMe3b&authorId=6506446785&origin=inward",
+                        "@rel": "scopus-author",
+                        "@_fa": "true"
+                    },
+                    {
+                        "@href": "http://api.elsevier.com/content/author/author_id/6506446785",
+                        "@rel": "self",
+                        "@_fa": "true"
+                    },
+                    {
+                        "@href": "http://api.elsevier.com/content/search/scopus?query=au-id%286506446785%29",
+                        "@rel": "search",
+                        "@_fa": "true"
+                    }
+                ]
+            },
+            "affiliation-current": {
+                "@id": "105188825",
+                "@href": "http://api.elsevier.com/content/affiliation/affiliation_id/105188825"
+            },
+            "affiliation-history": {
+                "affiliation": [
+                    {
+                        "@_fa": "true",
+                        "@id": "60011951",
+                        "@href": "http://api.elsevier.com/content/affiliation/affiliation_id/60011951"
+                    }
+                ]
+            },
+            "subject-areas": {
+                "subject-area": [
+                    {
+                        "@_fa": "true",
+                        "@abbrev": "IMMU",
+                        "@code": "2403",
+                        "$": "Immunology"
+                    },
+                    {
+                        "@_fa": "true",
+                        "@abbrev": "MEDI",
+                        "@code": "2726",
+                        "$": "Microbiology (medical)"
+                    },
+                    {
+                        "@_fa": "true",
+                        "@abbrev": "MEDI",
+                        "@code": "2700",
+                        "$": "Medicine (all)"
+                    },
+                    {
+                        "@_fa": "true",
+                        "@abbrev": "MEDI",
+                        "@code": "2723",
+                        "$": "Immunology and Allergy"
+                    },
+                    {
+                        "@_fa": "true",
+                        "@abbrev": "MEDI",
+                        "@code": "2708",
+                        "$": "Dermatology"
+                    },
+                    {
+                        "@_fa": "true",
+                        "@abbrev": "MEDI",
+                        "@code": "2735",
+                        "$": "Pediatrics, Perinatology and Child Health"
+                    },
+                    {
+                        "@_fa": "true",
+                        "@abbrev": "MEDI",
+                        "@code": "2728",
+                        "$": "Neurology (clinical)"
+                    },
+                    {
+                        "@_fa": "true",
+                        "@abbrev": "IMMU",
+                        "@code": "2404",
+                        "$": "Microbiology"
+                    },
+                    {
+                        "@_fa": "true",
+                        "@abbrev": "BIOC",
+                        "@code": "1300",
+                        "$": "Biochemistry, Genetics and Molecular Biology (all)"
+                    }
+                ]
+            },
+            "author-profile": {
+                "status": "update",
+                "date-created": {
+                    "@day": "02",
+                    "@month": "12",
+                    "@year": "2005"
+                },
+                "preferred-name": {
+                    "@date-locked": "2016-10-20T13:10:15.332-04:00",
+                    "@source": "corrapi-external",
+                    "initials": "S.",
+                    "indexed-name": "Uthaisangsook S.",
+                    "surname": "Uthaisangsook",
+                    "given-name": "Suwannee"
+                },
+                "name-variant": [
+                    {
+                        "@doc-count": "2",
+                        "@source": "internal-ani",
+                        "initials": "S.",
+                        "indexed-name": "Uthaisangsook S.",
+                        "surname": "Uthaisangsook",
+                        "given-name": "S."
+                    },
+                    {
+                        "@doc-count": "1",
+                        "@source": "internal-ani",
+                        "initials": "S.",
+                        "indexed-name": "Uthaisangsook S.",
+                        "surname": "Uthaisangsook",
+                        "given-name": "Suwanee"
+                    }
+                ],
+                "classificationgroup": {
+                    "classifications": {
+                        "@type": "ASJC",
+                        "classification": [
+                            {
+                                "@frequency": "2",
+                                "$": "2403"
+                            },
+                            {
+                                "@frequency": "1",
+                                "$": "2726"
+                            },
+                            {
+                                "@frequency": "5",
+                                "$": "2700"
+                            },
+                            {
+                                "@frequency": "3",
+                                "$": "2723"
+                            },
+                            {
+                                "@frequency": "1",
+                                "$": "2708"
+                            },
+                            {
+                                "@frequency": "2",
+                                "$": "2735"
+                            },
+                            {
+                                "@frequency": "1",
+                                "$": "2728"
+                            },
+                            {
+                                "@frequency": "1",
+                                "$": "2404"
+                            },
+                            {
+                                "@frequency": "2",
+                                "$": "1300"
+                            }
+                        ]
+                    }
+                },
+                "publication-range": {
+                    "@end": "2025",
+                    "@start": "1999"
+                },
+                "affiliation-current": {
+                    "affiliation": {
+                        "@affiliation-id": "105188825",
+                        "@parent": "60022498",
+                        "@source": "internal-ani",
+                        "ip-doc": {
+                            "@id": "105188825",
+                            "@type": "dept",
+                            "@relationship": "author",
+                            "afdispname": "Naresuan University, Department of Pediatrics",
+                            "preferred-name": {
+                                "@source": "internal-ani",
+                                "$": "Department of Pediatrics"
+                            },
+                            "parent-preferred-name": {
+                                "@source": "internal-ani",
+                                "$": "Naresuan University"
+                            },
+                            "sort-name": "Department of Pediatrics",
+                            "address": {
+                                "@country": "tha",
+                                "city": "Pitsanulok",
+                                "postal-code": "65000",
+                                "country": "Thailand"
+                            },
+                            "org-domain": "nu.ac.th",
+                            "org-URL": "https://www.nu.ac.th/?lang=en"
+                        }
+                    }
+                },
+                "affiliation-history": {
+                    "affiliation": [
+                        {
+                            "@affiliation-id": "105188825",
+                            "@parent": "60022498",
+                            "@source": "internal-ani",
+                            "ip-doc": {
+                                "@id": "105188825",
+                                "@type": "dept",
+                                "@relationship": "author",
+                                "afdispname": "Naresuan University, Department of Pediatrics",
+                                "preferred-name": {
+                                    "@source": "internal-ani",
+                                    "$": "Department of Pediatrics"
+                                },
+                                "parent-preferred-name": {
+                                    "@source": "internal-ani",
+                                    "$": "Naresuan University"
+                                },
+                                "sort-name": "Department of Pediatrics",
+                                "address": {
+                                    "@country": "tha",
+                                    "city": "Pitsanulok",
+                                    "postal-code": "65000",
+                                    "country": "Thailand"
+                                },
+                                "org-domain": "nu.ac.th",
+                                "org-URL": "https://www.nu.ac.th/?lang=en"
+                            }
+                        },
+                        {
+                            "@affiliation-id": "122457442",
+                            "@parent": "60022498",
+                            "@source": "internal-ani",
+                            "ip-doc": {
+                                "@id": "122457442",
+                                "@type": "dept",
+                                "@relationship": "author",
+                                "afdispname": "Naresuan University, Mueang Phitsanulok",
+                                "preferred-name": {
+                                    "@source": "internal-ani",
+                                    "$": "Mueang Phitsanulok"
+                                },
+                                "parent-preferred-name": {
+                                    "@source": "internal-ani",
+                                    "$": "Naresuan University"
+                                },
+                                "sort-name": "Mueang Phitsanulok",
+                                "address": {
+                                    "@country": "tha",
+                                    "city": "Pitsanulok",
+                                    "postal-code": "65000",
+                                    "country": "Thailand"
+                                },
+                                "org-domain": "nu.ac.th",
+                                "org-URL": "https://www.nu.ac.th/?lang=en"
+                            }
+                        },
+                        {
+                            "@affiliation-id": "60011951",
+                            "@source": "internal-ani",
+                            "ip-doc": {
+                                "@id": "60011951",
+                                "@type": "parent",
+                                "@relationship": "author",
+                                "afnameid": "Morsani College of Medicine#60011951",
+                                "afdispname": "Morsani College of Medicine",
+                                "preferred-name": {
+                                    "@source": "internal-ani",
+                                    "$": "Morsani College of Medicine"
+                                },
+                                "sort-name": "Morsani College of Medicine",
+                                "address": {
+                                    "@country": "usa",
+                                    "address-part": "12901 Bruce B. Downs Boulevard",
+                                    "city": "Tampa",
+                                    "state": "FL",
+                                    "postal-code": "33612-4742",
+                                    "country": "United States"
+                                },
+                                "org-domain": "health.usf.edu",
+                                "org-URL": "https://health.usf.edu/medicine/"
+                            }
+                        },
+                        {
+                            "@affiliation-id": "113853531",
+                            "@parent": "60011951",
+                            "@source": "internal-ani",
+                            "ip-doc": {
+                                "@id": "113853531",
+                                "@type": "dept",
+                                "@relationship": "author",
+                                "afdispname": "Morsani College of Medicine, Department of Pediatrics",
+                                "preferred-name": {
+                                    "@source": "internal-ani",
+                                    "$": "Department of Pediatrics"
+                                },
+                                "parent-preferred-name": {
+                                    "@source": "internal-ani",
+                                    "$": "Morsani College of Medicine"
+                                },
+                                "sort-name": "Department of Pediatrics",
+                                "address": {
+                                    "@country": "usa",
+                                    "address-part": "12901 Bruce B. Downs Boulevard",
+                                    "city": "Tampa",
+                                    "state": "FL",
+                                    "postal-code": "33612-4742",
+                                    "country": "United States"
+                                },
+                                "org-domain": "health.usf.edu",
+                                "org-URL": "https://health.usf.edu/medicine/"
+                            }
+                        },
+                        {
+                            "@affiliation-id": "103924537",
+                            "@parent": "60017994",
+                            "@source": "internal-ani",
+                            "ip-doc": {
+                                "@id": "103924537",
+                                "@type": "dept",
+                                "@relationship": "author",
+                                "afdispname": "Yale School of Medicine, Departments of Dermatology and Pediatrics",
+                                "preferred-name": {
+                                    "@source": "internal-ani",
+                                    "$": "Departments of Dermatology and Pediatrics"
+                                },
+                                "parent-preferred-name": {
+                                    "@source": "internal-ani",
+                                    "$": "Yale School of Medicine"
+                                },
+                                "sort-name": "Departments of Dermatology and Pediatrics",
+                                "address": {
+                                    "@country": "usa",
+                                    "address-part": "333 Cedar Street",
+                                    "city": "New Haven",
+                                    "state": "CT",
+                                    "postal-code": "06510-3206",
+                                    "country": "United States"
+                                },
+                                "org-domain": "medicine.yale.edu",
+                                "org-URL": "https://medicine.yale.edu/"
+                            }
+                        },
+                        {
+                            "@affiliation-id": "125772525",
+                            "@parent": "60199575",
+                            "@source": "internal-ani",
+                            "ip-doc": {
+                                "@id": "125772525",
+                                "@type": "dept",
+                                "@relationship": "author",
+                                "afdispname": "Siriraj Hospital, Division of Allergy and Immunology",
+                                "preferred-name": {
+                                    "@source": "internal-ani",
+                                    "$": "Division of Allergy and Immunology"
+                                },
+                                "parent-preferred-name": {
+                                    "@source": "internal-ani",
+                                    "$": "Siriraj Hospital"
+                                },
+                                "sort-name": "Division of Allergy and Immunology",
+                                "address": {
+                                    "@country": "tha",
+                                    "address-part": "Siriraj Sub- district, Bangkok Noi District, No. 2 Wanglang Road",
+                                    "city": "Bangkok",
+                                    "postal-code": "10700",
+                                    "country": "Thailand"
+                                },
+                                "org-domain": "si.mahidol.ac.th",
+                                "org-URL": "https://www.si.mahidol.ac.th/sirirajhospital/"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}
