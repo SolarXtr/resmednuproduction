@@ -106,6 +106,8 @@ def get_mock_data(researchers):
             "coverDate": cover_date,
             "year": str(year),
             "citations": citations,
+            "citations_scopus": citations,
+            "citations_pubmed": 0,
             "doi": doi,
             "quartile_scopus": q_scopus,
             "quartile_scimago": q_scimago,
@@ -276,6 +278,8 @@ def fetch_scopus_data_for_author(author_id, researcher_name, researcher_dept, st
                     "coverDate": cover_date,
                     "year": year,
                     "citations": citations,
+                    "citations_scopus": citations,
+                    "citations_pubmed": 0,
                     "doi": doi,
                     "quartile_scopus": q_scopus,
                     "quartile_scimago": q_scimago,
@@ -417,6 +421,8 @@ def fetch_pubmed_data_for_author(researcher_name, researcher_dept, status="Activ
                 "coverDate": pub_date or f"{year}-01-01",
                 "year": year,
                 "citations": 0,
+                "citations_scopus": 0,
+                "citations_pubmed": 0,
                 "doi": doi,
                 "quartile_scopus": q_scopus,
                 "quartile_scimago": q_scimago,
@@ -463,18 +469,31 @@ def main():
     for doc in all_results:
         key = doc["doi"] if doc["doi"] else doc["title"].lower().strip()
         if key not in unique_docs:
+            if "citations_scopus" not in doc:
+                doc["citations_scopus"] = doc.get("citations", 0) if "Scopus" in doc.get("databases", []) else 0
+            if "citations_pubmed" not in doc:
+                doc["citations_pubmed"] = doc.get("citations", 0) if "PubMed" in doc.get("databases", []) else 0
             unique_docs[key] = doc
         else:
             # Merge departments lists if the same paper was fetched via multiple authors
             existing = unique_docs[key]
             merged_depts = list(set(existing.get("departments", []) + doc.get("departments", [])))
             existing["departments"] = merged_depts
-            # Keep highest citations count if they differ
-            existing["citations"] = max(existing.get("citations", 0), doc.get("citations", 0))
+            
             # Merge database source tags
             existing_dbs = existing.get("databases", ["Scopus"])
             doc_dbs = doc.get("databases", ["Scopus"])
             existing["databases"] = list(set(existing_dbs + doc_dbs))
+            
+            # Merge and preserve separate citation counts
+            scopus_cites = max(existing.get("citations_scopus", 0), doc.get("citations_scopus", 0))
+            pubmed_cites = max(existing.get("citations_pubmed", 0), doc.get("citations_pubmed", 0))
+            
+            existing["citations_scopus"] = scopus_cites
+            existing["citations_pubmed"] = pubmed_cites
+            
+            # The primary "citations" field uses the Scopus citation count if available, fallback to PubMed
+            existing["citations"] = scopus_cites if "Scopus" in existing["databases"] else pubmed_cites
             
     final_results = list(unique_docs.values())
     
