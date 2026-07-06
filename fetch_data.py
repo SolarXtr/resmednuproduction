@@ -171,9 +171,9 @@ def get_journal_quartiles(issn, journal_name):
         SERIAL_CACHE[issn] = res
     return res
 
-def fetch_scopus_data_for_author(author_id, researcher_name, researcher_dept):
+def fetch_scopus_data_for_author(author_id, researcher_name, researcher_dept, status="Active"):
     """Fetches publications for a specific author ID from Scopus."""
-    print(f"Fetching publications for researcher: {researcher_name} (ID: {author_id})...")
+    print(f"Fetching publications for researcher: {researcher_name} (ID: {author_id}, Status: {status})...")
     url = "https://api.elsevier.com/content/search/scopus"
     headers = {
         "X-ELS-APIKey": API_KEY,
@@ -183,7 +183,7 @@ def fetch_scopus_data_for_author(author_id, researcher_name, researcher_dept):
         "query": f"AU-ID({author_id})",
         "count": 25,
         "start": 0,
-        "field": "dc:title,dc:creator,author,prism:doi,prism:coverDate,prism:publicationName,citedby-count,prism:issn"
+        "field": "dc:title,dc:creator,author,prism:doi,prism:coverDate,prism:publicationName,citedby-count,prism:issn,affiliation"
     }
     
     author_results = []
@@ -218,6 +218,22 @@ def fetch_scopus_data_for_author(author_id, researcher_name, researcher_dept):
                     citations = 0
                     
                 doi = entry.get("prism:doi", "")
+                
+                # Check affiliation filter for resigned/inactive researchers
+                if status in ["Resigned", "Inactive"]:
+                    aff_list = entry.get("affiliation", [])
+                    if not isinstance(aff_list, list):
+                        aff_list = [aff_list] if aff_list else []
+                    
+                    has_nu_aff = False
+                    for aff in aff_list:
+                        aff_name = str(aff.get("affilname", "")).lower()
+                        if "naresuan" in aff_name or "medicine" in aff_name:
+                            has_nu_aff = True
+                            break
+                    if not has_nu_aff:
+                        # Skip this publication as the resigned/inactive researcher was not affiliated with NU for this paper
+                        continue
                 
                 # Fetch Quartiles
                 q_scopus, q_scimago = get_journal_quartiles(issn, journal)
@@ -291,7 +307,8 @@ def main():
     
     # 2. Loop and fetch publications for each researcher
     for res in researchers:
-        res_pubs = fetch_scopus_data_for_author(res["author_id"], res["name"], res["department"])
+        status = res.get("status", "Active")
+        res_pubs = fetch_scopus_data_for_author(res["author_id"], res["name"], res["department"], status)
         if len(res_pubs) > 0:
             all_results.extend(res_pubs)
         else:

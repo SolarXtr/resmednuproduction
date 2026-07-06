@@ -861,7 +861,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const searchText = authorSearchInput.value.toLowerCase();
         
         // Compile author stats (Registered only)
-        const registeredNames = new Set(database.researchers.map(r => r.name.trim().toLowerCase()));
+        const activeResearchers = database.researchers.filter(r => r.status === "Active" || !r.status);
+        const registeredNames = new Set(activeResearchers.map(r => r.name.trim().toLowerCase()));
         const authorStats = {};
         
         filteredResults.forEach(pub => {

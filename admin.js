@@ -164,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <tr>
                         <th>Department / Division</th>
                         <th style="width: 20%; text-align: center;">Active Researchers</th>
-                        <th style="width: 20%; text-align: center;">Inactive Researchers</th>
+                        <th style="width: 20%; text-align: center;">Resigned / Inactive</th>
                         <th style="width: 20%; text-align: center;">Total Researchers</th>
                     </tr>
                 </thead>
@@ -290,9 +290,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const originalIndex = researchers.indexOf(r);
             const tr = document.createElement('tr');
             
-            const badgeStyle = r.status === 'Active' 
-                ? 'background: rgba(13, 148, 136, 0.15); color: var(--accent-teal); border: 1px solid rgba(13, 148, 136, 0.25);' 
-                : 'background: rgba(148, 163, 184, 0.15); color: var(--text-muted); border: 1px solid rgba(148, 163, 184, 0.25);';
+            let badgeStyle = '';
+            if (r.status === 'Active') {
+                badgeStyle = 'background: rgba(13, 148, 136, 0.15); color: var(--accent-teal); border: 1px solid rgba(13, 148, 136, 0.25);';
+            } else if (r.status === 'Resigned') {
+                badgeStyle = 'background: rgba(245, 158, 11, 0.15); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.25);';
+            } else {
+                badgeStyle = 'background: rgba(148, 163, 184, 0.15); color: var(--text-muted); border: 1px solid rgba(148, 163, 184, 0.25);';
+            }
 
             tr.innerHTML = `
                 <td style="font-weight:600;">${r.name}</td>
