@@ -360,10 +360,30 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isQ3) countQ3++;
             if (isQ4) countQ4++;
 
+            // Generate database source badges
+            const dbList = pub.databases || ["Scopus"];
+            const dbBadgesHtml = dbList.map(db => {
+                const cleanDb = db.trim();
+                const badgeClass = cleanDb.toLowerCase() === "scopus" ? "db-badge-scopus" : "db-badge-pubmed";
+                const icon = cleanDb.toLowerCase() === "scopus" ? "fa-solid fa-graduation-cap" : "fa-solid fa-notes-medical";
+                return `<span class="db-badge ${badgeClass}" style="font-size:0.6rem; padding:0.15rem 0.35rem; border-radius:4px; font-weight:600; display:inline-flex; align-items:center; gap:0.2rem;"><i class="${icon}" style="font-size:0.55rem;"></i>${cleanDb}</span>`;
+            }).join('');
+
+            const doiSection = pub.doi ? `
+                <a href="https://doi.org/${pub.doi}" target="_blank" class="doi-badge" style="font-size:0.6rem; padding:0.15rem 0.35rem; background: rgba(59, 130, 246, 0.1); color: var(--accent-blue); border: 1px solid rgba(59, 130, 246, 0.15); border-radius:4px; text-decoration:none; display:inline-flex; align-items:center; gap:0.2rem;">
+                    <i class="fa-solid fa-link" style="font-size:0.55rem;"></i>DOI: ${pub.doi}
+                </a>` : '';
+
             tr.innerHTML = `
                 <td class="center">${idx + 1}</td>
                 <td class="text-wrap-authors">${authorList}</td>
-                <td class="text-wrap-title">${pub.title}</td>
+                <td class="text-wrap-title">
+                    <div style="font-weight: 500;">${pub.title}</div>
+                    <div style="display: flex; gap: 0.25rem; flex-wrap: wrap; margin-top: 0.35rem; align-items: center;">
+                        ${doiSection}
+                        ${dbBadgesHtml}
+                    </div>
+                </td>
                 <td class="center">${pub.year || '-'}</td>
                 <td style="font-style: italic; white-space: normal; min-width: 250px;">${formatSourceTitle(pub)}</td>
                 <td class="number" style="font-weight:600; color:var(--accent-purple);">${pub.citations}</td>
