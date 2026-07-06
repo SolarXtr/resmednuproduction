@@ -3,6 +3,7 @@ import json
 import requests
 import datetime
 import random
+import time
 
 # Configuration
 API_KEY = "68e2bfd85d173bb9c601817d969e11e5"
@@ -107,7 +108,8 @@ def get_mock_data(researchers):
             "citations": citations,
             "doi": doi,
             "quartile_scopus": q_scopus,
-            "quartile_scimago": q_scimago
+            "quartile_scimago": q_scimago,
+            "databases": ["Scopus"]
         })
         
     return {
@@ -276,7 +278,8 @@ def fetch_scopus_data_for_author(author_id, researcher_name, researcher_dept, st
                     "citations": citations,
                     "doi": doi,
                     "quartile_scopus": q_scopus,
-                    "quartile_scimago": q_scimago
+                    "quartile_scimago": q_scimago,
+                    "databases": ["Scopus"]
                 })
                 
             total_results = int(search_results.get("opensearch:totalResults", 0))
@@ -295,6 +298,136 @@ def fetch_scopus_data_for_author(author_id, researcher_name, researcher_dept, st
         print(f"  Error fetching data for author {author_id}: {e}")
         return []
 
+def clean_pubmed_author_name(auth_name, researchers):
+    parts = auth_name.strip().split()
+    if not parts:
+        return auth_name
+    surname = parts[0].replace(",", "").lower()
+    initials = parts[1].lower() if len(parts) > 1 else ""
+    
+    for res in researchers:
+        res_name = res["name"]
+        res_parts = res_name.strip().split()
+        if len(res_parts) >= 2:
+            res_first = res_parts[0].lower()
+            res_last = res_parts[-1].lower()
+            if res_last == surname and initials and res_first.startswith(initials[0]):
+                return res["name"]
+                
+    if len(parts) > 1:
+        clean_initials = parts[1].replace(".", "")
+        initials_formatted = ".".join(list(clean_initials)) + "."
+        return f"{parts[0]} {initials_formatted}"
+    return auth_name
+
+def fetch_pubmed_data_for_author(researcher_name, researcher_dept, status="Active", researchers=[]):
+    """Fetches publications for a specific researcher name from PubMed."""
+    print(f"Fetching publications for researcher: {researcher_name} (PubMed, Status: {status})...")
+    parts = researcher_name.split()
+    if len(parts) >= 2:
+        term = f"{parts[-1]} {parts[0][0]}[Author] AND (Naresuan[Affiliation] OR Medicine[Affiliation])"
+    else:
+        term = f"{researcher_name}[Author] AND (Naresuan[Affiliation] OR Medicine[Affiliation])"
+
+    search_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
+    params = {
+        "db": "pubmed",
+        "term": term,
+        "retmode": "json",
+        "retmax": 25
+    }
+    
+    pubmed_results = []
+    try:
+        resp = requests.get(search_url, params=params, timeout=15)
+        if resp.status_code != 200:
+            return []
+            
+        search_data = resp.json()
+        id_list = search_data.get("esearchresult", {}).get("idlist", [])
+        if not id_list:
+            return []
+            
+        ids_str = ",".join(id_list)
+        summary_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"
+        sum_params = {
+            "db": "pubmed",
+            "id": ids_str,
+            "retmode": "json"
+        }
+        
+        sum_resp = requests.get(summary_url, params=sum_params, timeout=15)
+        if sum_resp.status_code != 200:
+            return []
+            
+        summary_data = sum_resp.json()
+        results_dict = summary_data.get("result", {})
+        
+        for pmid in id_list:
+            uid_data = results_dict.get(pmid, {})
+            if not uid_data or "title" not in uid_data:
+                continue
+                
+            title = uid_data.get("title", "Unknown Title").strip()
+            if title.endswith("."):
+                title = title[:-1]
+                
+            journal = uid_data.get("source", "Unknown Source")
+            pub_date = uid_data.get("pubdate", "")
+            year = pub_date.split()[0] if pub_date else "Unknown Year"
+            if len(year) > 4:
+                year = year[:4]
+                
+            doi = ""
+            for aid in uid_data.get("articleids", []):
+                if aid.get("idtype") == "doi":
+                    doi = aid.get("value", "")
+                    break
+                    
+            issn = ""
+            q_scopus, q_scimago = get_journal_quartiles(issn, journal)
+            
+            authors = uid_data.get("authors", [])
+            author_list = []
+            for a in authors:
+                auth_name = a.get("name")
+                if auth_name:
+                    cleaned = clean_pubmed_author_name(auth_name, researchers)
+                    author_list.append(cleaned)
+                    
+            cleaned_author_list = []
+            for name in author_list:
+                matched = False
+                if parts[-1].lower() in name.lower():
+                    cleaned_author_list.append(researcher_name)
+                    matched = True
+                if not matched:
+                    cleaned_author_list.append(name)
+                    
+            if not cleaned_author_list:
+                cleaned_author_list = [researcher_name]
+
+            pubmed_results.append({
+                "title": title,
+                "creator": researcher_name,
+                "authors": cleaned_author_list,
+                "corresponding_author": researcher_name,
+                "departments": [researcher_dept],
+                "journal": journal,
+                "coverDate": pub_date or f"{year}-01-01",
+                "year": year,
+                "citations": 0,
+                "doi": doi,
+                "quartile_scopus": q_scopus,
+                "quartile_scimago": q_scimago,
+                "databases": ["PubMed"]
+            })
+            
+    except Exception as e:
+        print(f"  Error fetching PubMed data for {researcher_name}: {e}")
+        
+    return pubmed_results
+
 def main():
     os.makedirs(os.path.dirname(os.path.abspath(OUTPUT_FILE)) or '.', exist_ok=True)
     
@@ -308,15 +441,22 @@ def main():
     # 2. Loop and fetch publications for each researcher
     for res in researchers:
         status = res.get("status", "Active")
+        
+        # A. Fetch from Scopus
         res_pubs = fetch_scopus_data_for_author(res["author_id"], res["name"], res["department"], status)
         if len(res_pubs) > 0:
             all_results.extend(res_pubs)
         else:
-            # If any individual API call fails and we get zero results for an active author,
-            # it might be due to credentials or IP restrictions.
-            # We flag this to decide whether to fall back to mock data
             if res == researchers[0]:
                 scopus_success = False
+                
+        # B. Fetch from PubMed
+        pubmed_pubs = fetch_pubmed_data_for_author(res["name"], res["department"], status, researchers)
+        if len(pubmed_pubs) > 0:
+            all_results.extend(pubmed_pubs)
+            
+        # Rate-limiting delay to prevent API blocks
+        time.sleep(0.3)
                 
     # 3. Deduplicate publications (using DOI or Title if DOI is empty)
     unique_docs = {}
@@ -327,10 +467,14 @@ def main():
         else:
             # Merge departments lists if the same paper was fetched via multiple authors
             existing = unique_docs[key]
-            merged_depts = list(set(existing["departments"] + doc["departments"]))
+            merged_depts = list(set(existing.get("departments", []) + doc.get("departments", [])))
             existing["departments"] = merged_depts
             # Keep highest citations count if they differ
-            existing["citations"] = max(existing["citations"], doc["citations"])
+            existing["citations"] = max(existing.get("citations", 0), doc.get("citations", 0))
+            # Merge database source tags
+            existing_dbs = existing.get("databases", ["Scopus"])
+            doc_dbs = doc.get("databases", ["Scopus"])
+            existing["databases"] = list(set(existing_dbs + doc_dbs))
             
     final_results = list(unique_docs.values())
     
