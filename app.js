@@ -660,86 +660,95 @@ document.addEventListener('DOMContentLoaded', () => {
             const isCorrespondingAuthor = (authorName, correspondingName) => {
                 if (!authorName || !correspondingName) return false;
                 
-                const getTokens = (str) => {
+                const normalize = (str) => {
                     return str.toLowerCase()
-                        .replace(/,/g, '')
-                        .replace(/\./g, '')
+                        .replace(/,/g, ' ')
+                        .replace(/\./g, ' ')
                         .replace(/[^a-z\s-]/g, '')
                         .trim()
                         .split(/\s+/)
                         .filter(t => t.length > 0);
                 };
                 
-                const aTokens = getTokens(authorName);
-                const cTokens = getTokens(correspondingName);
+                const aTokens = normalize(authorName);
+                const cTokens = normalize(correspondingName);
                 
                 if (aTokens.length === 0 || cTokens.length === 0) return false;
                 
-                // Compare significant parts (length > 2)
-                const aSig = aTokens.filter(t => t.length > 2);
-                const cSig = cTokens.filter(t => t.length > 2);
+                // Extract surnames (long tokens) and initials (short tokens)
+                const aSurnames = aTokens.filter(t => t.length > 2);
+                const cSurnames = cTokens.filter(t => t.length > 2);
+                const aInits = aTokens.filter(t => t.length <= 2).map(t => t[0]);
+                const cInits = cTokens.filter(t => t.length <= 2).map(t => t[0]);
                 
-                if (aSig.length > 0 && cSig.length > 0) {
-                    const hasSigMatch = aSig.some(a => cSig.includes(a));
-                    if (hasSigMatch) {
-                        // Check if initials match if both have initials
-                        const aInitials = aTokens.filter(t => t.length <= 2).map(t => t[0]);
-                        const cInitials = cTokens.filter(t => t.length <= 2).map(t => t[0]);
-                        if (aInitials.length > 0 && cInitials.length > 0) {
-                            return aInitials.some(ai => cInitials.includes(ai));
-                        }
-                        return true;
-                    }
+                // Must share at least one surname
+                const sharedSurname = aSurnames.some(a => cSurnames.includes(a));
+                if (!sharedSurname) return false;
+                
+                // If both have initials, they must match
+                if (aInits.length > 0 && cInits.length > 0) {
+                    return aInits.some(ai => cInits.includes(ai));
                 }
                 
-                const aLongest = aTokens.reduce((a, b) => a.length > b.length ? a : b, '');
-                const cLongest = cTokens.reduce((a, b) => a.length > b.length ? a : b, '');
-                if (aLongest === cLongest && aLongest.length > 2) {
-                    const aInit = aTokens.filter(t => t.length === 1);
-                    const cInit = cTokens.filter(t => t.length === 1);
-                    if (aInit.length > 0 && cInit.length > 0) {
-                        return aInit[0] === cInit[0];
-                    }
-                    return true;
+                // If one has initials and other has full names, check initial vs first char
+                if (aInits.length > 0 && cSurnames.length > 0) {
+                    return cSurnames.some(cs => aInits.includes(cs[0]));
+                }
+                if (cInits.length > 0 && aSurnames.length > 0) {
+                    return aSurnames.some(as => cInits.includes(as[0]));
                 }
                 
-                return false;
+                // Both have full names with shared surname
+                return true;
             };
 
             const matchResearcher = (authorName, researchers) => {
                 if (!authorName) return null;
-                const getTokens = (str) => {
-                    return str.toLowerCase()
-                        .replace(/,/g, '')
-                        .replace(/\./g, '')
-                        .replace(/[^a-z\s-]/g, '')
-                        .trim()
-                        .split(/\s+/)
-                        .filter(t => t.length > 0);
-                };
-                
-                const authTokens = getTokens(authorName);
+                const clean = authorName.toLowerCase()
+                    .replace(/,/g, ' ')
+                    .replace(/\./g, ' ')
+                    .replace(/[^a-z\s-]/g, '')
+                    .trim();
+                const authTokens = clean.split(/\s+/).filter(t => t.length > 0);
                 if (authTokens.length === 0) return null;
                 
-                const authSig = authTokens.filter(t => t.length > 2);
-                const authInitials = authTokens.filter(t => t.length <= 2).map(t => t[0]);
+                // Separate surname-like tokens (len > 2) from initials (len <= 2)
+                const authSurnames = authTokens.filter(t => t.length > 2);
+                const authInits = authTokens.filter(t => t.length <= 2).map(t => t[0]);
+                
+                let bestMatch = null;
                 
                 for (let r of researchers) {
-                    const resTokens = getTokens(r.name);
-                    const resSig = resTokens.filter(t => t.length > 2);
-                    const resInitials = resTokens.filter(t => t.length <= 2).map(t => t[0]);
+                    const rClean = r.name.toLowerCase().replace(/[^a-z\s-]/g, '').trim();
+                    const rTokens = rClean.split(/\s+/).filter(t => t.length > 0);
+                    if (rTokens.length < 2) continue;
                     
-                    const hasSigMatch = resSig.some(rt => authSig.includes(rt));
-                    if (!hasSigMatch) continue;
+                    // For researchers.json, names are "Firstname Lastname" format
+                    const rFirst = rTokens[0];          // e.g. "worawan"
+                    const rLast = rTokens[rTokens.length - 1]; // e.g. "jittham"
                     
-                    if (authInitials.length > 0 && resInitials.length > 0) {
-                        const matches = authInitials.some(ai => resInitials.includes(ai));
-                        if (!matches) continue;
+                    // The author's surname tokens must include the researcher's last name
+                    if (!authSurnames.includes(rLast)) continue;
+                    
+                    // Now verify initials: the author's initial must match researcher's first name initial
+                    if (authInits.length > 0) {
+                        if (authInits.includes(rFirst[0])) {
+                            return r; // Strong match: surname + initial
+                        }
+                        // Initials don't match this researcher, skip
+                        continue;
                     }
                     
-                    return r;
+                    // No initials in author name - check if full first name matches
+                    if (authSurnames.includes(rFirst)) {
+                        return r; // Full name match
+                    }
+                    
+                    // Surname matches but no initial to verify - weak match, save as fallback
+                    if (!bestMatch) bestMatch = r;
                 }
-                return null;
+                
+                return bestMatch;
             };
 
             const formatAuthorsWithEtAl = (authors, correspondingAuthor) => {

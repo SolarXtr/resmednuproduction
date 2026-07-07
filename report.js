@@ -82,48 +82,40 @@ document.addEventListener('DOMContentLoaded', () => {
     function isCorrespondingAuthor(authorName, correspondingName) {
         if (!authorName || !correspondingName) return false;
         
-        const getTokens = (str) => {
+        const normalize = (str) => {
             return str.toLowerCase()
-                .replace(/,/g, '')
-                .replace(/\./g, '')
+                .replace(/,/g, ' ')
+                .replace(/\./g, ' ')
                 .replace(/[^a-z\s-]/g, '')
                 .trim()
                 .split(/\s+/)
                 .filter(t => t.length > 0);
         };
         
-        const aTokens = getTokens(authorName);
-        const cTokens = getTokens(correspondingName);
+        const aTokens = normalize(authorName);
+        const cTokens = normalize(correspondingName);
         
         if (aTokens.length === 0 || cTokens.length === 0) return false;
         
-        const aSig = aTokens.filter(t => t.length > 2);
-        const cSig = cTokens.filter(t => t.length > 2);
+        const aSurnames = aTokens.filter(t => t.length > 2);
+        const cSurnames = cTokens.filter(t => t.length > 2);
+        const aInits = aTokens.filter(t => t.length <= 2).map(t => t[0]);
+        const cInits = cTokens.filter(t => t.length <= 2).map(t => t[0]);
         
-        if (aSig.length > 0 && cSig.length > 0) {
-            const hasSigMatch = aSig.some(a => cSig.includes(a));
-            if (hasSigMatch) {
-                const aInitials = aTokens.filter(t => t.length <= 2).map(t => t[0]);
-                const cInitials = cTokens.filter(t => t.length <= 2).map(t => t[0]);
-                if (aInitials.length > 0 && cInitials.length > 0) {
-                    return aInitials.some(ai => cInitials.includes(ai));
-                }
-                return true;
-            }
+        const sharedSurname = aSurnames.some(a => cSurnames.includes(a));
+        if (!sharedSurname) return false;
+        
+        if (aInits.length > 0 && cInits.length > 0) {
+            return aInits.some(ai => cInits.includes(ai));
+        }
+        if (aInits.length > 0 && cSurnames.length > 0) {
+            return cSurnames.some(cs => aInits.includes(cs[0]));
+        }
+        if (cInits.length > 0 && aSurnames.length > 0) {
+            return aSurnames.some(as => cInits.includes(as[0]));
         }
         
-        const aLongest = aTokens.reduce((a, b) => a.length > b.length ? a : b, '');
-        const cLongest = cTokens.reduce((a, b) => a.length > b.length ? a : b, '');
-        if (aLongest === cLongest && aLongest.length > 2) {
-            const aInit = aTokens.filter(t => t.length === 1);
-            const cInit = cTokens.filter(t => t.length === 1);
-            if (aInit.length > 0 && cInit.length > 0) {
-                return aInit[0] === cInit[0];
-            }
-            return true;
-        }
-        
-        return false;
+        return true;
     }
 
     function formatAuthorName(name) {
