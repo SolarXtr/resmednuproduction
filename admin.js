@@ -363,20 +363,48 @@ document.addEventListener('DOMContentLoaded', () => {
     // Helper function for corresponding author matching
     const isCorrespondingAuthor = (authorName, correspondingName) => {
         if (!authorName || !correspondingName) return false;
-        const aClean = authorName.toLowerCase().replace(/[^a-z\s]/g, '').trim();
-        const cClean = correspondingName.toLowerCase().replace(/[^a-z\s]/g, '').trim();
-        if (aClean === cClean) return true;
         
-        const aParts = aClean.split(/\s+/);
-        const cParts = cClean.split(/\s+/);
-        if (aParts.length > 0 && cParts.length > 0) {
-            const aLast = aParts[aParts.length - 1];
-            const cLast = cParts[cParts.length - 1];
-            const aFirst = aParts[0];
-            const cFirst = cParts[0];
-            if (aLast === cLast && aFirst[0] === cFirst[0]) return true;
-            if (aParts.includes(cLast) || cParts.includes(aLast)) return true;
+        const getTokens = (str) => {
+            return str.toLowerCase()
+                .replace(/,/g, '')
+                .replace(/\./g, '')
+                .replace(/[^a-z\s-]/g, '')
+                .trim()
+                .split(/\s+/)
+                .filter(t => t.length > 0);
+        };
+        
+        const aTokens = getTokens(authorName);
+        const cTokens = getTokens(correspondingName);
+        
+        if (aTokens.length === 0 || cTokens.length === 0) return false;
+        
+        const aSig = aTokens.filter(t => t.length > 2);
+        const cSig = cTokens.filter(t => t.length > 2);
+        
+        if (aSig.length > 0 && cSig.length > 0) {
+            const hasSigMatch = aSig.some(a => cSig.includes(a));
+            if (hasSigMatch) {
+                const aInitials = aTokens.filter(t => t.length <= 2).map(t => t[0]);
+                const cInitials = cTokens.filter(t => t.length <= 2).map(t => t[0]);
+                if (aInitials.length > 0 && cInitials.length > 0) {
+                    return aInitials.some(ai => cInitials.includes(ai));
+                }
+                return true;
+            }
         }
+        
+        const aLongest = aTokens.reduce((a, b) => a.length > b.length ? a : b, '');
+        const cLongest = cTokens.reduce((a, b) => a.length > b.length ? a : b, '');
+        if (aLongest === cLongest && aLongest.length > 2) {
+            const aInit = aTokens.filter(t => t.length === 1);
+            const cInit = cTokens.filter(t => t.length === 1);
+            if (aInit.length > 0 && cInit.length > 0) {
+                return aInit[0] === cInit[0];
+            }
+            return true;
+        }
+        
         return false;
     };
 

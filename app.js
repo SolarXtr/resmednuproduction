@@ -659,21 +659,87 @@ document.addEventListener('DOMContentLoaded', () => {
             // Helper function for robust corresponding author matching
             const isCorrespondingAuthor = (authorName, correspondingName) => {
                 if (!authorName || !correspondingName) return false;
-                const aClean = authorName.toLowerCase().replace(/[^a-z\s]/g, '').trim();
-                const cClean = correspondingName.toLowerCase().replace(/[^a-z\s]/g, '').trim();
-                if (aClean === cClean) return true;
                 
-                const aParts = aClean.split(/\s+/);
-                const cParts = cClean.split(/\s+/);
-                if (aParts.length > 0 && cParts.length > 0) {
-                    const aLast = aParts[aParts.length - 1];
-                    const cLast = cParts[cParts.length - 1];
-                    const aFirst = aParts[0];
-                    const cFirst = cParts[0];
-                    if (aLast === cLast && aFirst[0] === cFirst[0]) return true;
-                    if (aParts.includes(cLast) || cParts.includes(aLast)) return true;
+                const getTokens = (str) => {
+                    return str.toLowerCase()
+                        .replace(/,/g, '')
+                        .replace(/\./g, '')
+                        .replace(/[^a-z\s-]/g, '')
+                        .trim()
+                        .split(/\s+/)
+                        .filter(t => t.length > 0);
+                };
+                
+                const aTokens = getTokens(authorName);
+                const cTokens = getTokens(correspondingName);
+                
+                if (aTokens.length === 0 || cTokens.length === 0) return false;
+                
+                // Compare significant parts (length > 2)
+                const aSig = aTokens.filter(t => t.length > 2);
+                const cSig = cTokens.filter(t => t.length > 2);
+                
+                if (aSig.length > 0 && cSig.length > 0) {
+                    const hasSigMatch = aSig.some(a => cSig.includes(a));
+                    if (hasSigMatch) {
+                        // Check if initials match if both have initials
+                        const aInitials = aTokens.filter(t => t.length <= 2).map(t => t[0]);
+                        const cInitials = cTokens.filter(t => t.length <= 2).map(t => t[0]);
+                        if (aInitials.length > 0 && cInitials.length > 0) {
+                            return aInitials.some(ai => cInitials.includes(ai));
+                        }
+                        return true;
+                    }
                 }
+                
+                const aLongest = aTokens.reduce((a, b) => a.length > b.length ? a : b, '');
+                const cLongest = cTokens.reduce((a, b) => a.length > b.length ? a : b, '');
+                if (aLongest === cLongest && aLongest.length > 2) {
+                    const aInit = aTokens.filter(t => t.length === 1);
+                    const cInit = cTokens.filter(t => t.length === 1);
+                    if (aInit.length > 0 && cInit.length > 0) {
+                        return aInit[0] === cInit[0];
+                    }
+                    return true;
+                }
+                
                 return false;
+            };
+
+            const matchResearcher = (authorName, researchers) => {
+                if (!authorName) return null;
+                const getTokens = (str) => {
+                    return str.toLowerCase()
+                        .replace(/,/g, '')
+                        .replace(/\./g, '')
+                        .replace(/[^a-z\s-]/g, '')
+                        .trim()
+                        .split(/\s+/)
+                        .filter(t => t.length > 0);
+                };
+                
+                const authTokens = getTokens(authorName);
+                if (authTokens.length === 0) return null;
+                
+                const authSig = authTokens.filter(t => t.length > 2);
+                const authInitials = authTokens.filter(t => t.length <= 2).map(t => t[0]);
+                
+                for (let r of researchers) {
+                    const resTokens = getTokens(r.name);
+                    const resSig = resTokens.filter(t => t.length > 2);
+                    const resInitials = resTokens.filter(t => t.length <= 2).map(t => t[0]);
+                    
+                    const hasSigMatch = resSig.some(rt => authSig.includes(rt));
+                    if (!hasSigMatch) continue;
+                    
+                    if (authInitials.length > 0 && resInitials.length > 0) {
+                        const matches = authInitials.some(ai => resInitials.includes(ai));
+                        if (!matches) continue;
+                    }
+                    
+                    return r;
+                }
+                return null;
             };
 
             const formatAuthorsWithEtAl = (authors, correspondingAuthor) => {
@@ -743,13 +809,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }).join('');
 
             // Compute Faculty of Medicine researchers with superscript numbers
-            const registeredNames = new Set(database.researchers.map(r => r.name.trim().toLowerCase()));
             const nuResearchers = [];
+            const activeResList = database.researchers.filter(r => r.status === "Active" || !r.status);
+            
             pub.authors.forEach((author, index) => {
-                const cleaned = author.trim().toLowerCase();
-                if (registeredNames.has(cleaned)) {
-                    const regInfo = database.researchers.find(r => r.name.trim().toLowerCase() === cleaned);
-                    const displayName = regInfo ? regInfo.name : author;
+                const matchedRes = matchResearcher(author, activeResList);
+                if (matchedRes) {
+                    const displayName = matchedRes.name;
                     const formattedDisplay = formatAuthorName(displayName);
                     nuResearchers.push(`<span class="researcher-tag-item" style="font-weight: 500; font-size: 0.85rem; color: var(--text-primary);">${formattedDisplay}<sup>${index + 1}</sup></span>`);
                 }

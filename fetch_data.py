@@ -329,9 +329,9 @@ def fetch_pubmed_data_for_author(researcher_name, researcher_dept, status="Activ
     print(f"Fetching publications for researcher: {researcher_name} (PubMed, Status: {status})...")
     parts = researcher_name.split()
     if len(parts) >= 2:
-        term = f"{parts[-1]} {parts[0][0]}[Author] AND (Naresuan[Affiliation] OR Medicine[Affiliation])"
+        term = f"{parts[-1]} {parts[0][0]}[Author] AND Naresuan[Affiliation]"
     else:
-        term = f"{researcher_name}[Author] AND (Naresuan[Affiliation] OR Medicine[Affiliation])"
+        term = f"{researcher_name}[Author] AND Naresuan[Affiliation]"
 
     search_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
     params = {
