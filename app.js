@@ -516,44 +516,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Quartile Doughnut Chart Generation
-        const qCounts = { Q1: 0, Q2: 0, Q3: 0, Q4: 0 };
-        data.forEach(pub => {
-            const qVal = activeQuartileSource === 'scopus' ? pub.quartile_scopus : pub.quartile_scimago;
-            if (qVal && qCounts[qVal] !== undefined) {
-                qCounts[qVal]++;
-            }
-        });
-
-        const ctxQuartile = document.getElementById('quartileChart').getContext('2d');
-        quartileChart = new Chart(ctxQuartile, {
-            type: 'doughnut',
-            data: {
-                labels: ['Q1', 'Q2', 'Q3', 'Q4'],
-                datasets: [{
-                    data: [qCounts.Q1, qCounts.Q2, qCounts.Q3, qCounts.Q4],
-                    backgroundColor: [
-                        '#0d9488', // Q1
-                        '#2563eb', // Q2
-                        '#d97706', // Q3
-                        '#ef4444'  // Q4
-                    ],
-                    borderColor: '#ffffff',
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: { color: '#475569', boxWidth: 12, padding: 10 }
-                    }
-                }
-            }
-        });
-
         // --- SCIVAL CHART 1: Geographical Collaboration & FWCI ---
         const ctxScivalCollab = document.getElementById('scivalCollabChart').getContext('2d');
         scivalCollabChart = new Chart(ctxScivalCollab, {
