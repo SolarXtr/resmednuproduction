@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SciVal Research Analysis - Faculty of Medicine, NU</title>
+    <meta name="description" content="In-depth SciVal research performance analysis for Faculty of Medicine, Naresuan University (2021-2026).">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main CSS stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .scival-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .scival-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+        .scival-title h1 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            color: var(--text-primary);
+            font-size: 2.2rem;
+            letter-spacing: -0.5px;
+        }
+        .scival-title p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-top: 0.25rem;
+        }
+        .btn-back {
+            background: #ffffff;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1.25rem;
+            border-radius: 10px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+        .btn-back:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+            transform: translateY(-1px);
+        }
+        .scival-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        @media (max-width: 1024px) {
+            .scival-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .analysis-section {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+        }
+        .analysis-section h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.75rem;
+        }
+        .analysis-text p {
+            margin-bottom: 1rem;
+            line-height: 1.65;
+            color: #475569;
+            font-size: 0.95rem;
+        }
+        .analysis-text ul {
+            margin-left: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .analysis-text li {
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+            color: #475569;
+            font-size: 0.95rem;
+        }
+        .badge-fwci {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+        .badge-fwci-high {
+            background: rgba(13, 148, 136, 0.1);
+            color: #0d9488;
+        }
+        .badge-fwci-low {
+            background: rgba(234, 88, 12, 0.1);
+            color: #ea580c;
+        }
+    </style>
+</head>
+<body style="overflow-y: auto; height: auto;">
+    <div class="glass-bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="scival-container">
+        <!-- SciVal Header -->
+        <header class="scival-header">
+            <div class="scival-title">
+                <h1>SciVal Research Performance Analysis</h1>
+                <p><i class="fa-solid fa-calendar-days"></i> Year range: 2021 to 2026 | Source database: SciVal (Retrieved on 13 July 2026)</p>
+            </div>
+            <a href="index.html" class="btn-back">
+                <i class="fa-solid fa-arrow-left-long"></i> Back to Dashboard
+            </a>
+        </header>
+
+        <!-- KPI Summaries -->
+        <div class="kpi-grid" style="margin-bottom: 2rem;">
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: rgba(37, 99, 235, 0.1); color: var(--accent-blue);">
+                    <i class="fa-solid fa-file-invoice"></i>
+                </div>
+                <div class="kpi-info">
+                    <span class="kpi-label">Scholarly Output</span>
+                    <div class="kpi-value">343</div>
+                    <span class="kpi-footer">69.7% Open Access</span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: rgba(124, 58, 237, 0.1); color: var(--accent-purple);">
+                    <i class="fa-solid fa-quote-right"></i>
+                </div>
+                <div class="kpi-info">
+                    <span class="kpi-label">Total Citation Count</span>
+                    <div class="kpi-value">1,449</div>
+                    <span class="kpi-footer">4.2 Citations per Pub</span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: rgba(13, 148, 136, 0.1); color: var(--accent-teal);">
+                    <i class="fa-solid fa-globe"></i>
+                </div>
+                <div class="kpi-info">
+                    <span class="kpi-label">Avg Citation Impact (FWCI)</span>
+                    <div class="kpi-value">0.69</div>
+                    <span class="kpi-footer">Median FWCI: 0.26</span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: rgba(234, 88, 12, 0.1); color: #ea580c;">
+                    <i class="fa-solid fa-award"></i>
+                </div>
+                <div class="kpi-info">
+                    <span class="kpi-label">High Percentile Output</span>
+                    <div class="kpi-value">19</div>
+                    <span class="kpi-footer">5.5% in Top 10% Cited</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Layout Grid -->
+        <div class="scival-grid">
+            <!-- Left Panel: Tables & Details -->
+            <div style="display: flex; flex-direction: column; gap: 2rem;">
+                
+                <!-- Geographical Collaboration Matrix -->
+                <div class="analysis-section">
+                    <h3><i class="fa-solid fa-earth-americas"></i> Geographical Collaboration Performance</h3>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Collaboration Type</th>
+                                    <th style="text-align: center;">Share (%)</th>
+                                    <th style="text-align: center;">Scholarly Output</th>
+                                    <th style="text-align: center;">Citations</th>
+                                    <th style="text-align: center;">Citations / Pub</th>
+                                    <th style="text-align: center;">FWCI</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>International Collaboration</strong></td>
+                                    <td style="text-align: center; font-weight: 600;">28.3%</td>
+                                    <td style="text-align: center;">97</td>
+                                    <td style="text-align: center;">612</td>
+                                    <td style="text-align: center; font-weight: 600;">6.3</td>
+                                    <td style="text-align: center;"><span class="badge-fwci badge-fwci-high">1.21</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Only National Collaboration</strong></td>
+                                    <td style="text-align: center; font-weight: 600;">39.9%</td>
+                                    <td style="text-align: center;">137</td>
+                                    <td style="text-align: center;">573</td>
+                                    <td style="text-align: center; font-weight: 600;">4.2</td>
+                                    <td style="text-align: center;"><span class="badge-fwci badge-fwci-low">0.59</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Only Institutional Collaboration</strong></td>
+                                    <td style="text-align: center; font-weight: 600;">30.0%</td>
+                                    <td style="text-align: center;">103</td>
+                                    <td style="text-align: center;">251</td>
+                                    <td style="text-align: center; font-weight: 600;">2.4</td>
+                                    <td style="text-align: center;"><span class="badge-fwci badge-fwci-low">0.35</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Single Authorship (No Collaboration)</strong></td>
+                                    <td style="text-align: center; font-weight: 600;">1.8%</td>
+                                    <td style="text-align: center;">6</td>
+                                    <td style="text-align: center;">13</td>
+                                    <td style="text-align: center; font-weight: 600;">2.2</td>
+                                    <td style="text-align: center;"><span class="badge-fwci badge-fwci-low">0.39</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Top 10 Research Topics -->
+                <div class="analysis-section">
+                    <h3><i class="fa-solid fa-list-ol"></i> Top 10 Active Research Topics in SciVal</h3>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Topic Title & ID</th>
+                                    <th style="text-align: center;">Output</th>
+                                    <th style="text-align: center;">FWCI</th>
+                                    <th style="text-align: center;">Worldwide Prominence</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Enhanced Pain Management for Knee Arthroplasty</strong> (T.8428)</td>
+                                    <td style="text-align: center; font-weight: 600;">9</td>
+                                    <td style="text-align: center;">0.69</td>
+                                    <td style="text-align: center; color: var(--accent-blue); font-weight: 600;">91.63%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Tendinopathy in Athletes and Treatments</strong> (T.2755)</td>
+                                    <td style="text-align: center; font-weight: 600;">5</td>
+                                    <td style="text-align: center;">0.29</td>
+                                    <td style="text-align: center; color: var(--accent-blue); font-weight: 600;">95.81%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Mechanisms of T Cell Receptor Signal Transduction</strong> (T.3186)</td>
+                                    <td style="text-align: center; font-weight: 600;">5</td>
+                                    <td style="text-align: center;">0.25</td>
+                                    <td style="text-align: center; color: var(--accent-blue); font-weight: 600;">93.87%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Phytochemical Potential of Calotropis Procera Extracts</strong> (T.24427)</td>
+                                    <td style="text-align: center; font-weight: 600;">5</td>
+                                    <td style="text-align: center;">0.54</td>
+                                    <td style="text-align: center; color: var(--text-muted); font-weight: 600;">68.34%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Respiratory Syncytial Virus Dynamics and Prevention</strong> (T.1161)</td>
+                                    <td style="text-align: center; font-weight: 600;">4</td>
+                                    <td style="text-align: center;">0.73</td>
+                                    <td style="text-align: center; color: var(--accent-teal); font-weight: 600;">99.53%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Precision in Total Knee Arthroplasty Alignment</strong> (T.1590)</td>
+                                    <td style="text-align: center; font-weight: 600;">4</td>
+                                    <td style="text-align: center;">0.78</td>
+                                    <td style="text-align: center; color: var(--accent-teal); font-weight: 600;">97.99%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Gout Management and Uric Acid Control Strategies</strong> (T.1612)</td>
+                                    <td style="text-align: center; font-weight: 600;">4</td>
+                                    <td style="text-align: center; font-weight: 700; color: #0d9488;">1.93</td>
+                                    <td style="text-align: center; color: var(--accent-teal); font-weight: 600;">97.03%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>COVID-19 and Acute Kidney Injury Interactions</strong> (T.18129)</td>
+                                    <td style="text-align: center; font-weight: 600;">4</td>
+                                    <td style="text-align: center;">0.35</td>
+                                    <td style="text-align: center; color: var(--accent-blue); font-weight: 600;">88.45%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Carbapenem Resistance Mechanisms in Klebsiella Pneumoniae</strong> (T.225)</td>
+                                    <td style="text-align: center; font-weight: 600;">3</td>
+                                    <td style="text-align: center; font-weight: 700; color: #0d9488;">1.00</td>
+                                    <td style="text-align: center; color: var(--accent-teal); font-weight: 600;">99.06%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Acute Kidney Injury: Risk Factors and Outcomes</strong> (T.765)</td>
+                                    <td style="text-align: center; font-weight: 600;">3</td>
+                                    <td style="text-align: center;">0.96</td>
+                                    <td style="text-align: center; color: var(--accent-teal); font-weight: 600;">98.56%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Panel: Narrative & Recommendations -->
+            <div style="display: flex; flex-direction: column; gap: 2rem;">
+                
+                <!-- Strategic Highlights -->
+                <div class="analysis-section">
+                    <h3><i class="fa-solid fa-lightbulb" style="color: #eab308;"></i> Strategic Takeaways</h3>
+                    <div class="analysis-text">
+                        <p><strong>1. International Collaboration Leverage:</strong><br>
+                        Publications featuring international co-authors make up <strong>28.3%</strong> of total output, but yield a Field-Weighted Citation Impact (FWCI) of <strong>1.21</strong>. This is the only collaboration tier that exceeds the worldwide research citation average, showing the critical importance of overseas partnerships.</p>
+                        
+                        <p><strong>2. Academic-Corporate Opportunity:</strong><br>
+                        Only <strong>1.5%</strong> (5 publications) of our research is co-authored with corporate partners. Bridging the gap between medical academics and pharmaceutical or biomedical industries presents a massive avenue for translation and funding growth.</p>
+                        
+                        <p><strong>3. High Impact Research Clusters:</strong><br>
+                        Topics like <em>Gout Management & Uric Acid Control</em> (FWCI: 1.93) and <em>Carbapenem Resistance</em> (FWCI: 1.00) show outstanding citation rates, pointing to high-impact clinical excellence in our departments.</p>
+                    </div>
+                </div>
+
+                <!-- Strategic Recommendations -->
+                <div class="analysis-section" style="background: rgba(13, 148, 136, 0.05); border-color: rgba(13, 148, 136, 0.2);">
+                    <h3 style="color: #0f766e;"><i class="fa-solid fa-compass" style="color: #0d9488;"></i> Faculty Recommendations</h3>
+                    <div class="analysis-text">
+                        <ul>
+                            <li><strong>Seed Grants for International Co-authorship:</strong> Prioritize internal funding for projects collaborating with foreign universities.</li>
+                            <li><strong>Prominence-oriented Target Journals:</strong> Encourage researchers to publish in journals belonging to our top-performing global prominence topics (e.g. topics with prominence percentile >95%).</li>
+                            <li><strong>Promote Open Access:</strong> Maintain or increase the current 69.7% open access rate to maximize worldwide visibility and citation opportunities.</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</body>
+</html>

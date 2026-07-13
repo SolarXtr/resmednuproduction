@@ -280,6 +280,50 @@
                     </div>
                 </section>
 
+                <!-- SciVal Highlights Section -->
+                <section id="scival-highlights-section" class="dashboard-section" style="margin-top: 2rem;">
+                    <div class="section-card">
+                        <div class="section-card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                            <div>
+                                <h2><i class="fa-solid fa-square-poll-vertical"></i> SciVal Research Highlights</h2>
+                                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">
+                                    Data source: SciVal, retrieved on 13 July 2026 (Data up to 01 Jul 2026)
+                                </p>
+                            </div>
+                            <a href="scival.html" class="btn btn-add" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.2rem; font-weight: 600; border-radius: 8px;">
+                                <i class="fa-solid fa-chart-line"></i> View Detailed SciVal Analysis
+                            </a>
+                        </div>
+                        
+                        <!-- SciVal Charts Grid -->
+                        <div class="charts-grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); margin-top: 1.5rem;">
+                            <!-- Chart 1: Geographical Collaboration -->
+                            <div class="chart-card">
+                                <h3><i class="fa-solid fa-globe"></i> Geographical Collaboration & Citation Impact</h3>
+                                <div class="chart-container" style="height: 300px; position: relative;">
+                                    <canvas id="scivalCollabChart"></canvas>
+                                </div>
+                            </div>
+                            
+                            <!-- Chart 2: Publication Share by Subject Area -->
+                            <div class="chart-card">
+                                <h3><i class="fa-solid fa-chart-pie"></i> Publication Share by Subject Area</h3>
+                                <div class="chart-container" style="height: 300px; position: relative;">
+                                    <canvas id="scivalSubjectsChart"></canvas>
+                                </div>
+                            </div>
+                            
+                            <!-- Chart 3: Top Research Topics -->
+                            <div class="chart-card">
+                                <h3><i class="fa-solid fa-list-check"></i> Top Research Topics by Publications</h3>
+                                <div class="chart-container" style="height: 300px; position: relative;">
+                                    <canvas id="scivalTopicsChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
             </div>
         </main>
     </div>

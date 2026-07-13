@@ -17,6 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let authorsChart = null;
     let departmentsChart = null;
     let quartileChart = null;
+    let scivalCollabChart = null;
+    let scivalSubjectsChart = null;
+    let scivalTopicsChart = null;
 
     // DOM Elements
     const navOverview = document.getElementById('nav-overview');
@@ -298,6 +301,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (authorsChart) authorsChart.destroy();
         if (departmentsChart) departmentsChart.destroy();
         if (quartileChart) quartileChart.destroy();
+        if (scivalCollabChart) scivalCollabChart.destroy();
+        if (scivalSubjectsChart) scivalSubjectsChart.destroy();
+        if (scivalTopicsChart) scivalTopicsChart.destroy();
 
         // 1. Compile publications & citations by year
         const yearStats = {};
@@ -543,6 +549,166 @@ document.addEventListener('DOMContentLoaded', () => {
                     legend: {
                         position: 'bottom',
                         labels: { color: '#475569', boxWidth: 12, padding: 10 }
+                    }
+                }
+            }
+        });
+
+        // --- SCIVAL CHART 1: Geographical Collaboration & FWCI ---
+        const ctxScivalCollab = document.getElementById('scivalCollabChart').getContext('2d');
+        scivalCollabChart = new Chart(ctxScivalCollab, {
+            type: 'bar',
+            data: {
+                labels: ['International', 'National Only', 'Institutional Only', 'Single Author'],
+                datasets: [
+                    {
+                        label: 'Publications count',
+                        data: [97, 137, 103, 6],
+                        backgroundColor: 'rgba(37, 99, 235, 0.85)',
+                        borderColor: '#2563eb',
+                        borderWidth: 1.5,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Citation Impact (FWCI)',
+                        data: [1.21, 0.59, 0.35, 0.39],
+                        type: 'line',
+                        borderColor: '#ea580c',
+                        backgroundColor: 'rgba(234, 88, 12, 0.1)',
+                        borderWidth: 3.5,
+                        tension: 0.3,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#ea580c',
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { color: '#475569', boxWidth: 12 }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                if (context.dataset.label.includes('FWCI')) {
+                                    return `FWCI: ${context.parsed.y} (${context.parsed.y >= 1.0 ? 'Above' : 'Below'} World Average)`;
+                                }
+                                return `Publications: ${context.parsed.y}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#64748b', font: { weight: 'bold' } }
+                    },
+                    y: {
+                        position: 'left',
+                        grid: { color: '#e2e8f0' },
+                        ticks: { color: '#64748b' },
+                        title: { display: true, text: 'Publications', color: '#64748b' }
+                    },
+                    y1: {
+                        position: 'right',
+                        grid: { drawOnChartArea: false },
+                        ticks: { color: '#64748b' },
+                        title: { display: true, text: 'FWCI (World Avg = 1.0)', color: '#ea580c' },
+                        min: 0,
+                        max: 2.0
+                    }
+                }
+            }
+        });
+
+        // --- SCIVAL CHART 2: Publication Share by Subject Area ---
+        const ctxScivalSubjects = document.getElementById('scivalSubjectsChart').getContext('2d');
+        scivalSubjectsChart = new Chart(ctxScivalSubjects, {
+            type: 'doughnut',
+            data: {
+                labels: ['Medicine', 'Biochemistry & Genetics', 'Multidisciplinary', 'Pharmacology & Toxicology', 'Immunology & Microbiology', 'Other Fields'],
+                datasets: [{
+                    data: [78.4, 11.7, 7.9, 7.6, 5.3, 20.4],
+                    backgroundColor: [
+                        '#e11d48', // Medicine - Vibrant red
+                        '#0284c7', // Biochem - Blue
+                        '#4f46e5', // Multidisciplinary - Indigo
+                        '#0d9488', // Pharm - Teal
+                        '#b91c1c', // Immunology - Dark Red
+                        '#cbd5e1'  // Other - Gray
+                    ],
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#475569', boxWidth: 10, padding: 8 }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return ` ${context.label}: ${context.parsed}% of output`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // --- SCIVAL CHART 3: Top Research Topics by Publications ---
+        const ctxScivalTopics = document.getElementById('scivalTopicsChart').getContext('2d');
+        scivalTopicsChart = new Chart(ctxScivalTopics, {
+            type: 'bar',
+            data: {
+                labels: [
+                    'Enhanced Pain Management (Knee)',
+                    'Tendinopathy in Athletes',
+                    'T Cell Receptor Signal Transduction',
+                    'Calotropis Procera Extracts',
+                    'RSV Dynamics and Prevention'
+                ],
+                datasets: [{
+                    label: 'Publications',
+                    data: [9, 5, 5, 5, 4],
+                    backgroundColor: 'rgba(13, 148, 136, 0.85)',
+                    borderColor: '#0d9488',
+                    borderWidth: 1.5
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            afterBody: function(context) {
+                                const index = context[0].dataIndex;
+                                const percentiles = ['91.6%', '95.8%', '93.8%', '68.3%', '99.5%'];
+                                const fwcistats = ['0.69', '0.29', '0.25', '0.54', '0.73'];
+                                return `Prominence Percentile: ${percentiles[index]}\nTopic FWCI: ${fwcistats[index]}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: '#e2e8f0' },
+                        ticks: { color: '#64748b', stepSize: 1 }
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { color: '#0f172a', font: { weight: '500' } }
                     }
                 }
             }
