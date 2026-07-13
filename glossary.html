@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academic Metrics Glossary - Faculty of Medicine, NU</title>
+    <meta name="description" content="Comprehensive Academic Metrics Glossary and interpretation guide for Faculty of Medicine, Naresuan University.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main CSS stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .glossary-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .glossary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+        .glossary-title h1 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            color: var(--text-primary);
+            font-size: 2.2rem;
+            letter-spacing: -0.5px;
+        }
+        .glossary-title p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-top: 0.25rem;
+        }
+        .btn-back {
+            background: #ffffff;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1.25rem;
+            border-radius: 10px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+        .btn-back:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+            transform: translateY(-1px);
+        }
+        
+        /* Category Navigation tabs */
+        .category-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+            overflow-x: auto;
+        }
+        .tab-btn {
+            background: rgba(255,255,255,0.6);
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .tab-btn.active, .tab-btn:hover {
+            background: var(--accent-blue);
+            color: #ffffff;
+            border-color: var(--accent-blue);
+            box-shadow: 0 4px 12px rgba(37,99,235,0.2);
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 24px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-soft);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+        .metric-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .metric-name h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+        .metric-name span {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .metric-badge {
+            background: var(--accent-blue-glow);
+            color: var(--accent-blue);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        
+        .metric-detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        @media (max-width: 768px) {
+            .metric-detail-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .detail-block h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .detail-block p {
+            line-height: 1.6;
+            color: #475569;
+            font-size: 0.95rem;
+        }
+        .detail-block ul {
+            margin-left: 1.25rem;
+            margin-top: 0.5rem;
+        }
+        .detail-block li {
+            line-height: 1.5;
+            color: #475569;
+            font-size: 0.95rem;
+            margin-bottom: 0.4rem;
+        }
+
+        /* Benchmark visual elements */
+        .benchmark-gauge {
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 0.5rem;
+            border: 1px solid var(--border-color);
+        }
+        .benchmark-progress {
+            height: 10px;
+            border-radius: 5px;
+            background: #cbd5e1;
+            overflow: hidden;
+            margin: 0.5rem 0;
+            position: relative;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-teal));
+            width: 50%;
+        }
+        .benchmark-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        .badge-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-top: 0.5rem;
+        }
+        .status-exceed {
+            background: rgba(13, 148, 136, 0.1);
+            color: #0d9488;
+        }
+        .status-target {
+            background: rgba(234, 88, 12, 0.1);
+            color: #ea580c;
+        }
+    </style>
+</head>
+<body style="overflow-y: auto; height: auto;">
+    <div class="glass-bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="glossary-container">
+        <!-- Header -->
+        <header class="glossary-header">
+            <div class="glossary-title">
+                <h1>Metrics & Interpretation Guide</h1>
+                <p>คู่มือคำศัพท์เฉพาะและแนวทางการตีความแผนภูมิตัวชี้วัดวิจัยสำหรับคณะแพทยศาสตร์ มน.</p>
+            </div>
+            <a href="index.html" class="btn-back">
+                <i class="fa-solid fa-arrow-left-long"></i> Back to Dashboard
+            </a>
+        </header>
+
+        <!-- Category Tabs -->
+        <div class="category-tabs">
+            <button class="tab-btn active" onclick="filterCategory('all')">
+                <i class="fa-solid fa-border-all"></i> ทั้งหมด
+            </button>
+            <button class="tab-btn" onclick="filterCategory('core')">
+                <i class="fa-solid fa-user-check"></i> ตัวชี้วัดบุคคล & บทความ
+            </button>
+            <button class="tab-btn" onclick="filterCategory('journal')">
+                <i class="fa-solid fa-building-columns"></i> ตัวชี้วัดวารสาร
+            </button>
+            <button class="tab-btn" onclick="filterCategory('role')">
+                <i class="fa-solid fa-user-doctor"></i> บทบาทความเป็นผู้นำวิจัย
+            </button>
+        </div>
+
+        <!-- Metrics Sections -->
+        <div id="metrics-wrapper">
+            
+            <!-- METRIC 1: FWCI -->
+            <div class="metric-card" data-cat="core">
+                <div class="metric-card-header">
+                    <div class="metric-name">
+                        <h2>FWCI (Field-Weighted Citation Impact)</h2>
+                        <span>ดัชนีผลกระทบการอ้างอิงเชิงเปรียบเทียบปรับตามสาขาวิชา</span>
+                    </div>
+                    <span class="metric-badge"><i class="fa-solid fa-globe"></i> Core Metric</span>
+                </div>
+                <div class="metric-detail-grid">
+                    <div class="detail-block">
+                        <h3><i class="fa-solid fa-circle-question"></i> คืออะไร & ใช้ทำอะไร</h3>
+                        <p>ดัชนีชี้วัดคุณภาพงานวิจัยระดับสากลที่ใช้เปรียบเทียบยอดการอ้างอิงจริงที่บทความวิจัยได้รับ เทียบกับยอดอ้างอิงเฉลี่ยของโลกในสาขาวิชา ประเภทบทความ และปีที่เผยแพร่เดียวกัน เหมาะสำหรับการประเมินภาพรวมคุณภาพวิจัยของสถาบันโดยไม่เหลื่อมล้ำทางธรรมชาติสาขา</p>
+                    </div>
+                    <div class="detail-block">
+                        <h3><i class="fa-solid fa-chart-line"></i> เท่าไรจึงจะดี & แนวทางไปต่อ</h3>
+                        <p>ค่าเฉลี่ยมาตรฐานโลกคือ **1.00**:</p>
+                        <ul>
+                            <li><strong>ค่าสูงกว่า 1.00</strong>: เหนือกว่าค่าเฉลี่ยระดับโลก (เช่น 1.20 หมายถึงถูกอ้างอิงสูงกว่าโลก 20%) <span class="badge-status status-exceed"><i class="fa-solid fa-circle-check"></i> เหนือเฉลี่ยโลก</span></li>
+                            <li><strong>คำแนะนำ</strong>: คณะฯ ควรผลักดันโครงการร่วมกับสถาบันนานาชาติ (International Collaboration) ซึ่งจะดันค่า FWCI ไปสู่เป้าหมายที่สูงขึ้นได้ดีที่สุด</li>
+                        </ul>
+                        <div class="benchmark-gauge">
+                            <div class="benchmark-labels">
+                                <span>0.0 (ไม่มีอ้างอิง)</span>
+                                <span style="color: #ea580c; font-weight: 700;">1.0 (มาตรฐานโลก)</span>
+                                <span>2.0+ (สูงมาก)</span>
+                            </div>
+                            <div class="benchmark-progress">
+                                <div class="progress-fill" style="width: 50%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- METRIC 2: H-Index -->
+            <div class="metric-card" data-cat="core">
+                <div class="metric-card-header">
+                    <div class="metric-name">
+                        <h2>H-Index (Hirsch Index)</h2>
+                        <span>ดัชนีชี้วัดความคงเส้นคงวาและผลกระทบของนักวิจัย</span>
+                    </div>
+                    <span class="metric-badge"><i class="fa-solid fa-chart-line"></i> Core Metric</span>
+                </div>
+                <div class="metric-detail-grid">
+                    <div class="detail-block">
+                        <h3><i class="fa-solid fa-circle-question"></i> คืออะไร & ใช้ทำอะไร</h3>
+                        <p>ดัชนีสะท้อนตัวเลขผลงานวิจัยที่สมดุลระหว่าง "ปริมาณ" และ "การถูกอ้างอิง" (เช่น นักวิจัยมี H-index = 10 หมายความว่านักวิจัยคนนั้นมีบทความวิจัยอย่างน้อย 10 บทความ และแต่ละบทความถูกอ้างอิงอย่างน้อย 10 ครั้งขึ้นไป)</p>
+                    </div>
+                    <div class="detail-block">
+                        <h3><i class="fa-solid fa-chart-line"></i> เท่าไรจึงจะดี & แนวทางไปต่อ</h3>
+                        <p>สำหรับนักวิจัยทางการแพทย์และวิทยาศาสตร์สุขภาพ:</p>
+                        <ul>
+                            <li><strong>H-index 5–10</strong>: ระดับปานกลางในการวิจัยเริ่มต้น</li>
+                            <li><strong>H-index 15–20+</strong>: ถือว่าโดดเด่นและเป็นที่ยอมรับระดับสากล <span class="badge-status status-exceed"><i class="fa-solid fa-star"></i> โดดเด่นระดับสากล</span></li>
+                            <li><strong>คำแนะนำ</strong>: ควรวิเคราะห์บทความวิจัยที่มีแนวโน้มการอ้างอิงสะสมใกล้ถึงค่าเป้าหมาย เพื่อช่วยกระตุ้นการโปรโมตบทความชิ้นนั้นให้ข้ามเกณฑ์ H-index ถัดไป</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- METRIC 3: Journal Quartiles -->
+            <div class="metric-card" data-cat="journal">
+                <div class="metric-card-header">
+                    <div class="metric-name">
+                        <h2>Journal Quartiles (Q1 - Q4)</h2>
+                        <span>กลุ่มโควไทล์คุณภาพของวารสารวิชาการ</span>
+                    </div>
+                    <span class="metric-badge" style="background: rgba(124, 58, 237, 0.1); color: var(--accent-purple);"><i class="fa-solid fa-building-columns"></i> Journal Metric</span>
+                </div>
+                <div class="metric-detail-grid">
+                    <div class="detail-block">
+                        <h3><i class="fa-solid fa-circle-question"></i> คืออะไร & ใช้ทำอะไร</h3>
+                        <p>การจัดอันดับวารสารในแต่ละสาขาวิชาออกเป็น 4 ส่วนเท่าๆ กัน (Quartiles) ตามดัชนีผลกระทบการอ้างอิง:</p>
+                        <ul>
+                            <li><strong>Q1 (Quartile 1)</strong>: วารสารกลุ่มท็อป 25% แรกที่มีคุณภาพสูงสุดของสาขา</li>
+                            <li><strong>Q2</strong>: วารสารกลุ่ม 25% - 50%</li>
+                            <li><strong>Q3</strong>: วารสารกลุ่ม 50% - 75%</li>
+                            <li><strong>Q4</strong>: วารสารกลุ่มล่างสุด 75% - 100%</li>
+                        </ul>
+                    </div>
+                    <div class="detail-block">
+                        <h3><i class="fa-solid fa-chart-line"></i> เท่าไรจึงจะดี & แนวทางไปต่อ</h3>
+                        <p><strong>เป้าหมายเชิงยุทธศาสตร์: ตีพิมพ์ในระดับ Q1 และ Q2 เป็นหลัก</strong></p>
+                        <ul>
+                            <li>ช่วยดึงคะแนน Ranking มหาวิทยาลัยและอัตราการขอรับทุนวิจัยให้สูงขึ้นอย่างก้าวกระโดด</li>
+                            <li><strong>คำแนะนำ</strong>: ผลักดันและจูงใจนักวิจัยด้วยค่าตอบแทนการตีพิมพ์ (Incentives) สำหรับบทความที่ผ่านการยอมรับในระดับท็อปเทียร์ (Q1)</li>
+                        </ul>
+                        <div class="benchmark-gauge">
+                            <div class="benchmark-labels">
+                                <span style="color: #ef4444; font-weight: bold;">Q4</span>
+                                <span style="color: #d97706; font-weight: bold;">Q3</span>
+                                <span style="color: #2563eb; font-weight: bold;">Q2</span>
+                                <span style="color: #0d9488; font-weight: bold;">Q1 (ดีที่สุด)</span>
+                            </div>
+                            <div class="benchmark-progress">
+                                <div class="progress-fill" style="width: 100%; background: linear-gradient(90deg, #ef4444, #d97706, #2563eb, #0d9488);"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- METRIC 4: SJR -->
+            <div class="metric-card" data-cat="journal">
+                <div class="metric-card-header">
+                    <div class="metric-name">
+                        <h2>SJR (SCImago Journal Rank)</h2>
+                        <span>คะแนนความเก่งและระดับความน่าเชื่อถือของวารสาร</span>
+                    </div>
+                    <span class="metric-badge" style="background: rgba(124, 58, 237, 0.1); color: var(--accent-purple);"><i class="fa-solid fa-building-columns"></i> Journal Metric</span>
+                </div>
+                <div class="metric-detail-grid">
+                    <div class="detail-block">
+                        <h3><i class="fa-solid fa-circle-question"></i> คืออะไร & ใช้ทำอะไร</h3>
+                        <p>ค่าคะแนนเฉลี่ยที่วัดจากเกียรติประวัติและความดังของวารสารที่มาทำการอ้างอิงบทความวิจัยนั้นๆ (เปรียบเหมือนการอ้างอิงโดยวารสารชั้นเลิศจะได้แต้มถ่วงน้ำหนักมากกว่าการถูกอ้างอิงโดยวารสารทั่วไปหลายเท่า) พัฒนาโดยกลุ่ม SCImago ประเทศสเปน</p>
+                    </div>
+                    <div class="detail-block">
+                        <h3><i class="fa-solid fa-chart-line"></i> เท่าไรจึงจะดี & แนวทางไปต่อ</h3>
+                        <p><strong>ใช้ประเมินร่วมกับการจัดทำตำแหน่งวิชาการในประเทศไทย:</strong></p>
+                        <ul>
+                            <li>เป็นเกณฑ์สำคัญสำหรับใช้ยื่นขอกำหนดตำแหน่งทางวิชาการ (ศ., รอง ศ., ผศ.) ตามระเบียบ ก.พ.อ.</li>
+                            <li><strong>คำแนะนำ</strong>: ก่อนการตีพิมพ์ ควรนำชื่อวารสารเป้าหมายไปตรวจสอบค่า SJR บนเว็บไซต์ Scimago เพื่อดูระดับชั้นและอันดับในฟิลด์การวิจัยนั้นๆ</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- METRIC 5: Prominence Percentile -->
+            <div class="metric-card" data-cat="journal">
+                <div class="metric-card-header">
+                    <div class="metric-name">
+                        <h2>Prominence Percentile</h2>
+                        <span>ระดับแรงขับเคลื่อนและเทรนด์ความสนใจของโลก</span>
+                    </div>
+                    <span class="metric-badge" style="background: rgba(124, 58, 237, 0.1); color: var(--accent-purple);"><i class="fa-solid fa-building-columns"></i> Journal Metric</span>
+                </div>
+                <div class="metric-detail-grid">
+                    <div class="detail-block">
+                        <h3><i class="fa-solid fa-circle-question"></i> คืออะไร & ใช้ทำอะไร</h3>
+                        <p>ค่าเปอร์เซ็นไทล์ความเด่นของหัวข้อวิจัยในระดับโลก (SciVal Topics) ที่ประมวลผลความเคลื่อนไหวและความสดใหม่เชิงวิชาการจากบทความ ยอดดาวน์โหลด และอัตราอ้างอิงสะสมทั่วโลก ช่วยให้นักวิจัยมองเห็นเทรนด์งานวิจัยที่โลกต้องการสูงสุดในแต่ละปี</p>
+                    </div>
+                    <div class="detail-block">
+                        <h3><i class="fa-solid fa-chart-line"></i> เท่าไรจึงจะดี & แนวทางไปต่อ</h3>
+                        <p><strong>ค่าเป้าหมาย: ยิ่งใกล้ 100% ยิ่งเด่น (ควรอยู่ระดับ > 90% หรือ 95%+)</strong></p>
+                        <ul>
+                            <li><strong>คำแนะนำ</strong>: นักวิจัยควรนำทางทิศทางงานวิจัยไปสู่วารสารและงานเขียนกลุ่มที่มี Prominence Percentile สูง เพื่อรับโอกาสในการอ้างอิงที่ง่ายขึ้นและได้รับการพิจารณาทุนวิจัยต่างประเทศสูงขึ้น</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- METRIC 6: First vs Corresponding Author -->
+            <div class="metric-card" data-cat="role">
+                <div class="metric-card-header">
+                    <div class="metric-name">
+                        <h2>First Author & Corresponding Author</h2>
+                        <span>ผู้ประพันธ์คนแรก และผู้ประพันธ์หลักผู้รับผิดชอบบทความ</span>
+                    </div>
+                    <span class="metric-badge" style="background: rgba(13, 148, 136, 0.1); color: var(--accent-teal);"><i class="fa-solid fa-user-doctor"></i> Leadership Role</span>
+                </div>
+                <div class="metric-detail-grid">
+                    <div class="detail-block">
+                        <h3><i class="fa-solid fa-circle-question"></i> คืออะไร & ใช้ทำอะไร</h3>
+                        <p>บทบาทแสดงถึงความเป็นผู้นำทางวิชาการและการควบคุมโครงการวิจัยหลัก:</p>
+                        <ul>
+                            <li><strong>First Author (ผู้แต่งคนแรก)</strong>: เป็นผู้ดำเนินงานวิจัย ปฏิบัติการในห้องทดลอง คลินิก และเขียนร่างสิ่งพิมพ์ขึ้นมาเป็นส่วนใหญ่</li>
+                            <li><strong>Corresponding Author (ผู้แต่งหลักผู้รับผิดชอบบทความ)</strong>: หัวหน้าโครงการวิจัย (PI) ผู้ดูแลความสมบูรณ์ ความถูกต้องเชิงจริยธรรม จัดหาแหล่งทุน และเป็นผู้ติดต่อสื่อสารหลักกับกองบรรณาธิการของวารสาร</li>
+                        </ul>
+                    </div>
+                    <div class="detail-block">
+                        <h3><i class="fa-solid fa-chart-line"></i> เท่าไรจึงจะดี & แนวทางไปต่อ</h3>
+                        <p><strong>มีผลอย่างยิ่งต่อความก้าวหน้าและการพิจารณาตัวชี้วัดองค์กร:</strong></p>
+                        <ul>
+                            <li>ในระดับคณะฯ หรือการยื่นขอผลงานทางวิชาการ จะพิจารณาบทบาท First Author และ Corresponding Author เป็นหลักเพื่อยืนยันว่าการทำงานนั้นอยู่ภายใต้การนำหลักของบุคลากรภายในสถาบันจริง</li>
+                            <li><strong>คำแนะนำ</strong>: สนับสนุนการริเริ่มวิจัยโดยอาจารย์แพทย์ มน. เป็นผู้นำโครงการหลักมากกว่าการมีส่วนร่วมในฐานะผู้ร่วมแต่งรอง</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Tab switcher JS -->
+    <script>
+        function filterCategory(cat) {
+            // Update active button state
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            // Filter cards
+            const cards = document.querySelectorAll('.metric-card');
+            cards.forEach(card => {
+                if (cat === 'all' || card.getAttribute('data-cat') === cat) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
