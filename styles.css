@@ -919,6 +919,12 @@ body {
     border: 1px solid rgba(13, 148, 136, 0.2);
 }
 
+.db-badge-wos {
+    background: rgba(249, 115, 22, 0.1);
+    color: #f97316;
+    border: 1px solid rgba(249, 115, 22, 0.2);
+}
+
 /* Print Layout Stylings for PDF Export */
 @media print {
     body, html {

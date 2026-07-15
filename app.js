@@ -940,8 +940,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const dbList = pub.databases || ["Scopus"];
             const dbBadgesHtml = dbList.map(db => {
                 const cleanDb = db.trim();
-                const icon = cleanDb.toLowerCase() === "scopus" ? "fa-solid fa-graduation-cap" : "fa-solid fa-notes-medical";
-                const badgeClass = cleanDb.toLowerCase() === "scopus" ? "db-badge-scopus" : "db-badge-pubmed";
+                let icon = "fa-solid fa-graduation-cap";
+                let badgeClass = "db-badge-scopus";
+                if (cleanDb.toLowerCase() === "pubmed") {
+                    icon = "fa-solid fa-notes-medical";
+                    badgeClass = "db-badge-pubmed";
+                } else if (cleanDb.toLowerCase() === "wos" || cleanDb.toLowerCase() === "web of science") {
+                    icon = "fa-solid fa-book";
+                    badgeClass = "db-badge-wos";
+                }
                 return `<span class="db-badge ${badgeClass}"><i class="${icon}" style="font-size: 0.65rem;"></i> ${cleanDb}</span>`;
             }).join('');
 

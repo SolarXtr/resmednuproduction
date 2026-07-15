@@ -473,7 +473,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const dbList = pub.databases || ["Scopus"];
             const dbBadgesHtml = dbList.map(db => {
                 const cleanDb = db.trim();
-                const badgeClass = cleanDb.toLowerCase() === "scopus" ? "db-badge-scopus" : "db-badge-pubmed";
+                let badgeClass = "db-badge-scopus";
+                if (cleanDb.toLowerCase() === "pubmed") {
+                    badgeClass = "db-badge-pubmed";
+                } else if (cleanDb.toLowerCase() === "wos" || cleanDb.toLowerCase() === "web of science") {
+                    badgeClass = "db-badge-wos";
+                }
                 return `<span class="db-badge ${badgeClass}" style="font-size:0.6rem; padding:0.1rem 0.3rem;">${cleanDb}</span>`;
             }).join(' ');
 
@@ -603,6 +608,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const dbList = pub.databases || ["Scopus"];
             document.getElementById('db-scopus').checked = dbList.includes("Scopus");
             document.getElementById('db-pubmed').checked = dbList.includes("PubMed");
+            document.getElementById('db-wos').checked = dbList.includes("WoS") || dbList.includes("Web of Science");
         } else {
             publicationModalTitle.textContent = "Add New Article";
             publicationForm.reset();
@@ -616,6 +622,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('pub-q-scimago').value = "";
             document.getElementById('db-scopus').checked = true;
             document.getElementById('db-pubmed').checked = false;
+            document.getElementById('db-wos').checked = false;
         }
         publicationModal.classList.add('active');
     }
@@ -636,6 +643,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const databases = [];
         if (document.getElementById('db-scopus').checked) databases.push("Scopus");
         if (document.getElementById('db-pubmed').checked) databases.push("PubMed");
+        if (document.getElementById('db-wos').checked) databases.push("WoS");
         if (databases.length === 0) databases.push("Scopus"); // Fallback
 
         const record = {
