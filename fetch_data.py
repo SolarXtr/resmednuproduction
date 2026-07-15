@@ -262,7 +262,9 @@ def fetch_scopus_data_for_author(author_id, researcher_name, researcher_dept, st
                 cleaned_author_list = []
                 for name in author_list:
                     matched = False
-                    if researcher_name.split()[-1].lower() in name.lower():
+                    # Extract individual tokens to prevent matching substrings (e.g. Kosuma matching Kosum)
+                    name_tokens = [w.strip(".,").lower() for w in name.split()]
+                    if researcher_name.split()[-1].lower() in name_tokens:
                         cleaned_author_list.append(researcher_name)
                         matched = True
                     if not matched:
@@ -402,7 +404,9 @@ def fetch_pubmed_data_for_author(researcher_name, researcher_dept, status="Activ
             cleaned_author_list = []
             for name in author_list:
                 matched = False
-                if parts[-1].lower() in name.lower():
+                # Extract individual tokens to prevent matching substrings (e.g. Kosuma matching Kosum)
+                name_tokens = [w.strip(".,").lower() for w in name.split()]
+                if parts[-1].lower() in name_tokens:
                     cleaned_author_list.append(researcher_name)
                     matched = True
                 if not matched:
@@ -479,6 +483,17 @@ def main():
             existing = unique_docs[key]
             merged_depts = list(set(existing.get("departments", []) + doc.get("departments", [])))
             existing["departments"] = merged_depts
+            
+            # Prefer longer or more complete authors list
+            existing_authors = existing.get("authors", [])
+            doc_authors = doc.get("authors", [])
+            if len(doc_authors) > len(existing_authors):
+                existing["authors"] = doc_authors
+            elif len(doc_authors) == len(existing_authors):
+                existing_fullness = sum(len(a) for a in existing_authors)
+                doc_fullness = sum(len(a) for a in doc_authors)
+                if doc_fullness > existing_fullness:
+                    existing["authors"] = doc_authors
             
             # Merge database source tags
             existing_dbs = existing.get("databases", ["Scopus"])
